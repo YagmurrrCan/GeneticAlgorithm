@@ -1,52 +1,68 @@
+import java.io.IOException;
 import java.util.Arrays;
 
 public class Chromosome {
-    private int fitness;
-    private boolean isFitnessChanged=true;
+
     private int[] genes;
-    private GeneticAlgorithm geneticAlgorithm;
+    private boolean isFitnessChanged=true;
+    private double fitness=0;
+    private int genesLength = 75;
 
-    public Chromosome(GeneticAlgorithm geneticAlgorithm){
 
-        //  genes = new int[geneticAlgorithm.getTargetChromosomeGenes().length];
-        this.geneticAlgorithm = geneticAlgorithm;
+    public Chromosome(){
+
+        genes = new int[genesLength];
     }
 
-    public Chromosome initializeChromosome(){
-        // DEMO (CHANGE LATER)
-        for(int i=0;i<genes.length;i++){
-            if(Math.random()>0.5) genes[i]=1;
-            else genes[i]=0;
-        }
-        return this;
-    }
-
-    public int[] getGenes(){
+    public int[] getGenes() {
         isFitnessChanged = true;
         return genes;
     }
 
-    public int getFitness(){
+    public double getFitness() throws IOException {
         if(isFitnessChanged){
-            fitness = recalculateFitness();
+            fitness = recalculateFitness(); // get ingredients and user
             isFitnessChanged = false;
         }
         return fitness;
     }
 
+    public Chromosome initializeChromosome(){
+        // System.out.println("INSIDE INITIALIZE CHROMOSOME\n");
+
+        for(int i=0;i<genes.length;i++){
+            if(Math.random()>0.8) genes[i]=1;
+            else genes[i]=0;
+        }
+        //   System.out.println("CHROMOSOME INITIALIZED\n");
+
+        return this;
+
+    }
+
+
+
     public String toString(){
         return Arrays.toString(this.genes);
     }
 
-    public int recalculateFitness(){
-        int chromosomeFitness = 0;
 
+    public double recalculateFitness() throws IOException {
+        //  System.out.println("INSIDE CALCULATE FITNESS\n");
+
+
+        //    System.out.println("INSIDE FITNESS CALCULATION LOOP\n");
         for(int i=0;i<genes.length;i++){
-            // if(genes[i] == geneticAlgorithm.getTargetChromosomeGenes()[i]) chromosomeFitness++;
+
+            if (genes[i] == 1) {
+                //     System.out.println("INSIDE IFFFFF CALCULATION LOOP\n");
+
+
+
+                //   System.out.println("IF GENE IS 1\n");
+            }
+
         }
 
-        return chromosomeFitness;
     }
-
-
 }

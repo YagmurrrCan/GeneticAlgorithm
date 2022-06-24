@@ -1,257 +1,181 @@
 import java.util.ArrayList;
+import java.util.Comparator;
 
 public class GeneticAlgorithm {
 
-    private int[] targetSolution;
-    private double crossoverRate;
-    private double mutationRate;
-    private int noOfEliteChromosomes;
-    private int tournamentSelectionSize;
+    public final static int CHOICE_COUNT = 3;
+    public final static int POPULATION_SIZE = 25;
+    public final static int GENERATION_ITERATIONS = 100;
+    public final static int GENERATIONS = 10000;
+    public final static int CHROMOSOME_SIZE = (int) Math.pow(2, CHOICE_COUNT * 2);
+    public final static double MUTATION_CHANCE = 0.01;
 
-
-
-    public GeneticAlgorithm(int[] targetSolution, double crossoverRate, double mutationRate,
-                            int noOfEliteChromosomes, int tournamentSelectionSize) {
-        this.targetSolution = targetSolution;
-        this.crossoverRate = crossoverRate;
-        this.mutationRate = mutationRate;
-        this.noOfEliteChromosomes = noOfEliteChromosomes;
-        this.tournamentSelectionSize = tournamentSelectionSize;
-    }
-    public Population evolve(Population population){
-        return mutatePopulation(crossoverPopulation(population));
-
-    }
-    private Population crossoverPopulation(Population population){
-        Population crossoverPopulation = new Population(population.getChromosomes().length,this);
-        for(int i=0;i< noOfEliteChromosomes;i++){
-            crossoverPopulation.getChromosomes()[i]= population.getChromosomes()[i];
+    public static int score(boolean isPlayerOne, boolean playerOneCooperates, boolean playerTwoCooperates) {
+        if (playerOneCooperates == playerTwoCooperates) {
+            return playerOneCooperates ? 2 : 1;
+        } else {
+            return isPlayerOne == playerTwoCooperates ? 3 : 0;
         }
-        Chromosome chromosome1 = null;
-        Chromosome chromosome2 = null;
+    }
 
-        for(int i=noOfEliteChromosomes;i<population.getChromosomes().length;i++){
-            if(Math.random()<=crossoverRate){
-                //pick the two chromosomes with the highest fitness score
-                chromosome1 = selectTournamentPopulation(population).getChromosomes()[0];
-                chromosome2 = selectTournamentPopulation(population).getChromosomes()[0];
-                crossoverPopulation.getChromosomes()[i] = crossoverChromosome(chromosome1,chromosome2);
-            }else{
-                // No crossover
-                crossoverPopulation.getChromosomes()[i]= selectTournamentPopulation(population).getChromosomes()[0];
+    public class Individual implements Comparable<Individual> {
+        public boolean[] chromosome = new boolean[CHROMOSOME_SIZE];
+        public int score = 0;
+
+        public Individual() {
+            for (int i = 0; i < chromosome.length; i++) {
+                chromosome[i] = Math.random() > 0.5;
             }
         }
-        return crossoverPopulation;
-    }
-    private Population mutatePopulation(Population population){
-        Population mutatePopulation = new Population(population.getChromosomes().length,this);
-        for(int i=0; i<noOfEliteChromosomes;i++){
-            mutatePopulation.getChromosomes()[i]= population.getChromosomes()[i];
-        }
-        for(int i=noOfEliteChromosomes;i<population.getChromosomes().length;i++){
-            mutatePopulation.getChromosomes()[i]= mutateChromosome(population.getChromosomes()[i]);
-        }
 
-        return mutatePopulation;
-    }
+        public boolean makeChoice(boolean[] opponentChoices, boolean[] myChoices) {
+            int digitValue = CHROMOSOME_SIZE / 2;
+            int index = 0;
 
-
-    public int[] getTargetSolution() {
-        return targetSolution;
-    }
-
-    private Chromosome crossoverChromosome(Chromosome chromosome1,Chromosome chromosome2){
-        //mutate population method will call this method in a loop
-        Chromosome crossoverChromosome = new Chromosome(this);
-        for(int i=0;i<chromosome1.getGenes().length;i++){
-            if(Math.random() <0.5) crossoverChromosome.getGenes()[i]= chromosome1.getGenes()[i];
-            else crossoverChromosome.getGenes()[i] = chromosome2.getGenes()[i];
-        }
-
-        return crossoverChromosome;
-    }
-
-    private Chromosome mutateChromosome(Chromosome chromosome){
-        Chromosome mutateChromosome = new Chromosome(this);
-
-        for(int i=0;i<chromosome.getGenes().length;i++){
-            if(Math.random() <= mutationRate) {
-                // perform mutation
-                if(Math.random() < 0.5) mutateChromosome.getGenes()[i]=1; // change to decimal later!
-                else mutateChromosome.getGenes()[i]=0; // change to decimal later!
-
-            } else mutateChromosome.getGenes()[i] = chromosome.getGenes()[i];
-
-        }
-
-        return mutateChromosome;
-    }
-
-    private Population selectTournamentPopulation(Population population){
-        Population tournamentPopulation = new Population(tournamentSelectionSize, this);
-        for(int i=0; i<tournamentSelectionSize;i++){
-            tournamentPopulation.getChromosomes()[i]= population.getChromosomes()[(int)
-                    (Math.random()* population.getChromosomes().length)];
-        }
-        tournamentPopulation.sortChromosomesByFitness();
-        return tournamentPopulation;
-    }
-
-
-}
-
-
-
-
-interface GeneticAlgorithmInterface {
-    public void generatePool();
-    public int[] select();
-    public void mutate(int chromIndex);
-    public void crossover(int chromIndex1, int chromIndex2);
-    public double fitness(String chrom);
-    public String run();
-}
-
-public abstract class GeneticAlgorithm implements GeneticAlgorithmInterface {
-
-    int iterations = 200;
-    private ArrayList<String> pool = new ArrayList<>();
-    private int poolLength = 100;
-    private int elementSize = -1;
-    private double mutationRate = .002;
-    private double crossoverRate = .6;
-
-    public GeneticAlgorithm() {}
-
-    public GeneticAlgorithm(int poolLength, int elementSize) {
-        this.poolLength = poolLength;
-        this.elementSize = elementSize;
-    }
-
-    public GeneticAlgorithm(int poolLength, int elementSize, double mutationRate, double crossoverRate) {
-        this(poolLength, elementSize);
-        this.mutationRate = mutationRate;
-        this.crossoverRate = crossoverRate;
-    }
-
-    public GeneticAlgorithm(int poolLength, int elementSize, int iterations) {
-        this(poolLength, elementSize);
-        this.iterations = iterations;
-    }
-
-    public GeneticAlgorithm(int poolLength, int elementSize, double mutationRate, double crossoverRate, int iterations) {
-        this(poolLength, elementSize, mutationRate, crossoverRate);
-        this.iterations = iterations;
-    }
-
-    @Override
-    public void generatePool() {
-        while (pool.size() < poolLength) {
-            String chrom = "";
-            while (chrom.length() < elementSize) {
-                chrom += (int) (Math.random() * 2);
-            }
-            pool.add(chrom);
-        }
-    }
-
-    @Override
-    public int[] select() {
-        double[] fitnesses = new double[pool.size()];
-        for (int i = 0; i < pool.size(); i++) {
-            fitnesses[i] = fitness(pool.get(i));
-        }
-        double sum = 0;
-        for (double fitness : fitnesses) {
-            sum += fitness;
-        }
-        double val = Math.random() * sum;
-        int chrom1Index = -1;
-        int chrom2Index = -1;
-        for (int i = 0; chrom1Index < 0; i++) {
-            val -= fitnesses[i];
-            if (val <= 0) {
-                chrom1Index = i;
-            }
-        }
-        val = Math.random() * (sum - fitnesses[chrom1Index]);
-        for (int i = 0; chrom2Index < 0; i++) {
-            if (i != chrom1Index) {
-                val -= fitnesses[i];
-                if (val <= 0) {
-                    chrom2Index = i;
+            for (boolean b : opponentChoices) {
+                if (b) {
+                    index += digitValue;
                 }
+                digitValue /= 2;
             }
+
+            for (boolean b : myChoices) {
+                if (b) {
+                    index += digitValue;
+                }
+                digitValue /= 2;
+            }
+
+            return chromosome[index];
         }
-        return new int[]{chrom1Index, chrom2Index};
+
+        @Override
+        public int compareTo(GeneticAlgorithm.Individual o) {
+            return this.score < o.score ? 1 : -1;
+        }
+
+        @Override
+        public String toString() {
+            return "My score is " + score;
+        }
+
     }
 
-    @Override
-    public void mutate(int chromIndex) {
-        boolean mutated = false;
-        char[] chrom = pool.get(chromIndex).toCharArray();
-        for (int i = 0; i < chrom.length; i++) {
-            if (Math.random() < mutationRate) {
-                chrom[i] = (chrom[i] == '1') ? '0' : '1';
-                mutated = true;
-            }
-        }
-        if (mutated) {
-            String res = new String(chrom);
-            pool.set(chromIndex, res);
+    ArrayList<Individual> population = new ArrayList<Individual>();
+
+    public GeneticAlgorithm() {
+        for (int i = 0; i < POPULATION_SIZE; i++) {
+            population.add(new Individual());
         }
     }
 
-    @Override
-    public void crossover(int chromIndex1, int chromIndex2) {
-        if (Math.random() < crossoverRate) {
-            String chrom1 = pool.get(chromIndex1);
-            String chrom2 = pool.get(chromIndex2);
-            //split before chrom[bit]
-            int bit = (int) Math.floor(Math.random() * (elementSize - 1) + 1);
-            String chr1 = chrom1.substring(0, bit) + chrom2.substring(bit);
-            String chr2 = chrom2.substring(0, bit) + chrom1.substring(bit);
-            pool.set(chromIndex1, chr1);
-            pool.set(chromIndex2, chr2);
+    public Individual breed(Individual a, Individual b, int crossover) {
+        Individual c = new Individual();
+
+        for (int i = 0; i < crossover; i++) {
+            c.chromosome[i] = a.chromosome[i];
+        }
+
+        for (int i = crossover; i < CHROMOSOME_SIZE; i++) {
+            c.chromosome[i] = b.chromosome[i];
+        }
+
+        return c;
+    }
+
+    public void mutate(Individual individual) {
+        for (int i = 0; i < individual.chromosome.length; i++) {
+            if (Math.random() < MUTATION_CHANCE) {
+                individual.chromosome[i] = !individual.chromosome[i];
+            }
         }
     }
 
-    @Override
-    public String run() {
-        if (elementSize < 0) {
-            Exception e = new Exception("elementSize < 0");
-            e.printStackTrace();
-            System.exit(-1);
-        }
+    public void evolveGeneration() {
+        for (int i = 0; i < population.size(); i++) {
+            for (int j = i + 1; j < population.size(); j++) {
+                boolean[] iChoices = new boolean[CHOICE_COUNT];
+                boolean[] jChoices = new boolean[CHOICE_COUNT];
 
-        pool.clear();
-        generatePool();
+                for (int k = 0; k < GENERATION_ITERATIONS; k++) {
+                    boolean iChoice = population.get(i).makeChoice(jChoices, iChoices);
+                    boolean jChoice = population.get(j).makeChoice(iChoices, jChoices);
 
-        String bestSolution = "";
-        double bestFitness = -1;
+                    population.get(i).score += score(true, iChoice, jChoice);
+                    population.get(j).score += score(false, jChoice, iChoice);
 
-        for (int i = 0; i < iterations; i++) {
-            ArrayList<String> newPool = new ArrayList<>();
-            while (pool.size() > 0) {
-                int[] pair = select();
-                crossover(pair[0], pair[1]);
-                mutate(pair[0]);
-                mutate(pair[1]);
-                newPool.add(pool.get(pair[0]));
-                newPool.add(pool.get(pair[1]));
-                pool.remove(pair[0]);
-                pool.remove(pair[1] - ((pair[0] < pair[1]) ? 1 : 0));
-            }
-            pool = newPool;
-            for (String chrom : pool) {
-                double fitness = fitness(chrom);
-                if (fitness > bestFitness) {
-                    bestSolution = chrom;
-                    bestFitness = fitness;
+                    for (int l = 0; l < CHOICE_COUNT - 1; l++) {
+                        iChoices[l + 1] = iChoices[l];
+                        jChoices[l + 1] = jChoices[l];
+                    }
+
+                    iChoices[0] = iChoice;
+                    jChoices[0] = jChoice;
                 }
             }
         }
 
-        return bestSolution;
+        population.sort(new Comparator<Individual>() {
+            @Override
+            public int compare(GeneticAlgorithm.Individual o1, GeneticAlgorithm.Individual o2) {
+                return o1.compareTo(o2);
+            }
+        });
+
+        ArrayList<Individual> nextPopulation = new ArrayList<Individual>();
+
+        for (int i = 1; i < population.size(); i += 2) {
+            int crossover = (int) Math.floor(Math.random() * CHOICE_COUNT);
+            nextPopulation.add(breed(population.get(i - 1), population.get(i), crossover));
+            nextPopulation.add(breed(population.get(i), population.get(i - 1), crossover));
+        }
+
+        for (Individual individual : nextPopulation) {
+            mutate(individual);
+        }
     }
+
+    public Individual getBestIndividual() {
+        for (int i = 0; i < population.size(); i++) {
+            for (int j = i + 1; j < population.size(); j++) {
+                for (int k = 0; k < GENERATION_ITERATIONS; k++) {
+                    boolean[] iChoices = new boolean[CHOICE_COUNT];
+                    boolean[] jChoices = new boolean[CHOICE_COUNT];
+
+                    boolean iChoice = population.get(i).makeChoice(jChoices, iChoices);
+                    boolean jChoice = population.get(j).makeChoice(iChoices, jChoices);
+
+                    population.get(i).score += score(true, iChoice, jChoice);
+                    population.get(j).score += score(false, jChoice, iChoice);
+                }
+            }
+        }
+
+        population.sort(new Comparator<Individual>() {
+            @Override
+            public int compare(GeneticAlgorithm.Individual o1, GeneticAlgorithm.Individual o2) {
+                return o1.compareTo(o2);
+            }
+        });
+
+        return population.get(0);
+    }
+
+    public static void main(String[] args) {
+        GeneticAlgorithm GA = new GeneticAlgorithm();
+
+        for (int i = 0; i < GENERATIONS; i++) {
+            GA.evolveGeneration();
+        }
+
+        boolean[] bestChromosome = GA.getBestIndividual().chromosome;
+
+        for (boolean b : bestChromosome) {
+            if (b)
+                System.out.print('1');
+            else
+                System.out.print('0');
+        }
+    }
+
 }

@@ -3,13 +3,14 @@
  * @author Lenovo
  */
 public class Course {
-    String name;
+
+    int courseId;
     String exam;
     int capacity;
 
 
-    Course(String name, String exam, int capacity) {
-        this.name = name;
+    Course(int courseId, String exam, int capacity) {
+        this.courseId = courseId;
         this.exam = exam;
         this.capacity = capacity;
         if (capacity >= 0 && capacity <= 100) {
@@ -18,6 +19,14 @@ public class Course {
             this.capacity = 0;
         }
 
+    }
+
+    public int getCourseId() {
+        return courseId;
+    }
+
+    public void setCourseId(int courseId) {
+        this.courseId = courseId;
     }
 
 }

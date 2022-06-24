@@ -1,32 +1,25 @@
 public class Exam {
 
-    String name;
-    String instructor;
+    String examName;
     int time;
     int roomnumber;
 
 
-    Exam(String name, String instructor, int time, int roomnumber) {
-        this.name = name;
-        this.instructor = instructor;
+    Exam(String examName, int time, int roomnumber) {
+        this.examName = examName;
         this.time = time;
         this.roomnumber = roomnumber;
     }
 
-    public String getName() {
-        return name;
+    public Exam(String c) {
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public String getExamName() {
+        return examName;
     }
 
-    public String getInstructor() {
-        return instructor;
-    }
-
-    public void setInstructor(String instructor) {
-        this.instructor = instructor;
+    public void setExamName(String examName) {
+        this.examName = examName;
     }
 
     public int getTime() {

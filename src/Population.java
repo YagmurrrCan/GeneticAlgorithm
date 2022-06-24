@@ -1,37 +1,112 @@
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Random;
 
 public class Population {
 
-    private Chromosome[] chromosomes;
-    private GeneticAlgorithm geneticAlgorithm;
+   // private Chromosome[] chromosomes;
+    private int populationSize;
+    private int examDays;
+    private int examSlots;
+    private int fittest;
+    private ArrayList<Individual> individuals;
 
-    public Population(int populationSize, GeneticAlgorithm geneticAlgorithm) {
-        chromosomes = new Chromosome[populationSize];
-        this.geneticAlgorithm = geneticAlgorithm;
+    //constructor #1
+    public Population(int populationSize, int examDays, int examSlots) {
+        this.populationSize = populationSize;
+        this.examDays = examDays;
+        this.examSlots = examSlots;
+        this.individuals = new ArrayList<>(populationSize);
     }
 
-    public Population initializePopulation(){
-        //DEMO (VALUES FROM THE DATASET WILL BE USED LATER)
-        for(int i=0;i<chromosomes.length;i++){
-            chromosomes[i]= new Chromosome(geneticAlgorithm).initializeChromosome();
+    //Initialize population
+    public void initializePopulation(ArrayList<Course> courses, ArrayList<Room> rooms) {
+        for (int i = 0; i < populationSize; i++) {
+            Individual I = new Individual(examDays, examSlots, courses, rooms);
+            I.convertToTable();
+            this.individuals.add(I);
         }
-        sortChromosomesByFitness();
-        return this;
     }
 
-    public Chromosome[] getChromosomes(){
-        return chromosomes;
+    //Calculate fitness of each individual in the population
+    public void calculateFitness() {
+        for (int i = 0; i < individuals.size(); i++) {
+            individuals.get(i).calcFitness();
+        }
+        getFittest();
     }
-    public void sortChromosomesByFitness(){
-        Arrays.sort(chromosomes,(chromosome1,chromosome2)-> {
-            int flag = 0;
-            if(chromosome1.getFitness()>chromosome2.getFitness()) flag=-1;
-            else if(chromosome1.getFitness()<chromosome2.getFitness()) flag=1;
-            return flag;
 
+    //Remove poor Individuals and add new ones.
+    public void updatePopulation() {
+        System.out.println("Updating Population..");
+        this.sortPopulation();
+        int half = populationSize / 2;
+        for (int i = half; i < populationSize; i++) {
+            individuals.remove(i);
+        }
+        ArrayList<Room> r = new ArrayList<>();
+        for (int i = 0; i < half; i++) {
+            Individual newIndividual = new Individual(examDays, examSlots, Data.courses, r);
+            newIndividual.convertToTable();
+            individuals.add(newIndividual);
+        }
+    }
+
+    public void sortPopulation() {
+        Collections.sort(individuals, new Comparator<Individual>() {
+            public int compare(Individual o1, Individual o2) {
+                return (int) (o2.getFitness() - o1.getFitness());
+            }
         });
     }
 
+    //Get the fittest individual
+    public Individual getFittest() {
+        int maxFit = Integer.MIN_VALUE;
+        int maxFitIndex = 0;
+        for (int i = 0; i < individuals.size(); i++) {
+            if (maxFit <= individuals.get(i).getFitness()) {
+                maxFit = (int) individuals.get(i).getFitness();
+                maxFitIndex = i;
+            }
+        }
+        fittest = (int) individuals.get(maxFitIndex).getFitness();
+        return individuals.get(maxFitIndex);
+    }
 
+    //shuffling the population so that individuals are selected randomly in tournament.
+    public void shuffle() {
+        Random rnd = new Random();
+        for (int i = populationSize - 1; i > 0; i--) {
+            int index = rnd.nextInt(i + 1);
+            Individual a = individuals.get(index);
+            individuals.set(index, individuals.get(i));
+            individuals.set(i, a);
+        }
+    }
 
+    //printing fitness of individuals in population.
+    public void printFitness() {
+        for (int i = 0; i < populationSize; i++) {
+            System.out.print(individuals.get(i).getFitness() + " ");
+        }
+        System.out.println();
+    }
+
+    public void addIndividual(Individual I) {
+        this.individuals.add(I);
+    }
+
+    public ArrayList<Individual> getIndividuals() {
+        return individuals;
+    }
+
+    public Individual getIndividual(int i) {
+        return this.individuals.get(i);
+    }
+
+    public int getPopulationSize() {
+        return populationSize;
+    }
 }

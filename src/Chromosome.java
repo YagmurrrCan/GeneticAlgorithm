@@ -1,17 +1,23 @@
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Random;
+import java.util.Vector;
 
 public class Chromosome {
 
+    Main main = new Main();
+
     private int[] genes;
-    private boolean isFitnessChanged=true;
-    private double fitness=0;
+    boolean isFitnessChanged = true;
+    private double fitness = -1;
     private int genesLength = 75;
 
-
-    public Chromosome(){
-
+    public Chromosome() {
         genes = new int[genesLength];
+    }
+
+    public int getGenesLength() {
+        return genesLength;
     }
 
     public int[] getGenes() {
@@ -20,26 +26,26 @@ public class Chromosome {
     }
 
     public double getFitness() throws IOException {
-        if(isFitnessChanged){
-            fitness = recalculateFitness(); // get ingredients and user
+        if(isFitnessChanged) {
+            fitness = calculateFitness();
             isFitnessChanged = false;
         }
         return fitness;
     }
 
-    public Chromosome initializeChromosome(){
-        // System.out.println("INSIDE INITIALIZE CHROMOSOME\n");
+    public Chromosome initializeChromosome() {;
 
-        for(int i=0;i<genes.length;i++){
-            if(Math.random()>0.8) genes[i]=1;
-            else genes[i]=0;
+        for(int i=0; i < genes.length; i++){
+            if(Math.random() > 0.5) {
+                genes[i]=1;
+            }
+            else {
+                genes[i] = 0;
+            }
         }
-        //   System.out.println("CHROMOSOME INITIALIZED\n");
 
         return this;
-
     }
-
 
 
     public String toString(){
@@ -47,22 +53,11 @@ public class Chromosome {
     }
 
 
-    public double recalculateFitness() throws IOException {
-        //  System.out.println("INSIDE CALCULATE FITNESS\n");
+    public double calculateFitness() throws IOException {
 
-
-        //    System.out.println("INSIDE FITNESS CALCULATION LOOP\n");
-        for(int i=0;i<genes.length;i++){
-
-            if (genes[i] == 1) {
-                //     System.out.println("INSIDE IFFFFF CALCULATION LOOP\n");
-
-
-
-                //   System.out.println("IF GENE IS 1\n");
-            }
-
-        }
-
+         return 0;
     }
+
+
+
 }

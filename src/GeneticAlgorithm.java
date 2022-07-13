@@ -1,181 +1,133 @@
-import java.util.ArrayList;
-import java.util.Comparator;
-
 public class GeneticAlgorithm {
 
-    public final static int CHOICE_COUNT = 3;
-    public final static int POPULATION_SIZE = 25;
-    public final static int GENERATION_ITERATIONS = 100;
-    public final static int GENERATIONS = 10000;
-    public final static int CHROMOSOME_SIZE = (int) Math.pow(2, CHOICE_COUNT * 2);
-    public final static double MUTATION_CHANCE = 0.01;
+    public static final int populationSize = 25;
+    public static final int noOfEliteChromosomes = 1;
+    public static final int tournamentSelectionSize = 4;
+    private static final double mutationRate = 0.5;
+    public static final double  crossoverRate= 0.9;
 
-    public static int score(boolean isPlayerOne, boolean playerOneCooperates, boolean playerTwoCooperates) {
-        if (playerOneCooperates == playerTwoCooperates) {
-            return playerOneCooperates ? 2 : 1;
-        } else {
-            return isPlayerOne == playerTwoCooperates ? 3 : 0;
-        }
+    public Population changePopulation(Population population) {
+
+        return mutatePopulation(crossoverPopulation(population));
+
     }
 
-    public class Individual implements Comparable<Individual> {
-        public boolean[] chromosome = new boolean[CHROMOSOME_SIZE];
-        public int score = 0;
+    private Population crossoverPopulation(Population population) {
 
-        public Individual() {
-            for (int i = 0; i < chromosome.length; i++) {
-                chromosome[i] = Math.random() > 0.5;
-            }
+        Population crossoverPopulation = new Population(population.getChromosomes().length);
+
+        for(int i=0; i < noOfEliteChromosomes; i++){
+            crossoverPopulation.getChromosomes()[i] = population.getChromosomes()[i];
+
         }
 
-        public boolean makeChoice(boolean[] opponentChoices, boolean[] myChoices) {
-            int digitValue = CHROMOSOME_SIZE / 2;
-            int index = 0;
+        for(int i= noOfEliteChromosomes; i < population.getChromosomes().length; i++) {
 
-            for (boolean b : opponentChoices) {
-                if (b) {
-                    index += digitValue;
+            Chromosome parent1 = selectTournamentPopulation(population).getChromosomes()[0];
+            Chromosome parent2 = selectTournamentPopulation(population).getChromosomes()[0];
+
+            crossoverPopulation.getChromosomes()[i] = crossoverChromosome(parent1,parent2);
+
+        }
+
+        return crossoverPopulation;
+    }
+
+    private Chromosome crossoverChromosome(Chromosome parent1,Chromosome parent2){
+        // random genes selection from parent chromosomes
+        Chromosome newChromosome = new Chromosome();
+
+        newChromosome.init(null);
+
+       /* for(int i=0; i < parent1.getGenes().length; i++) {
+            if(Math.random() > 0.5) {
+                newChromosome.getGenes()[i] = parent1.getGenes()[i];
+            }
+            else {
+                newChromosome.getGenes()[i] = parent2.getGenes()[i];
+            }
+        }
+        */
+
+        ArrayList<String> courseCodesList = new ArrayList<>(StudentsNcoursesDataStore.getInstance().getCoursesHashMap().keySet());
+        for (int i=0; i< courseCodesList.size()/2; i++){
+            int[] coursePosition = parent1.getCourseIndex(courseCodesList.get(i));
+            newChromosome.getDays()[coursePosition[0]].getDaySlots()[coursePosition[1]][coursePosition[2]]
+                    = courseCodesList.get(i);
+        }
+
+        for (int i=courseCodesList.size()/2; i< courseCodesList.size(); i++){
+            int[] coursePosition = parent2.getCourseIndex(courseCodesList.get(i));
+            int j= coursePosition[0], k = coursePosition[1], l = coursePosition[2];
+
+            Day[] days = newChromosome.getDays();
+            String[][] daySlots = days[j].getDaySlots();
+            String s = daySlots[k][l];
+
+            while (!s.equals("----")){
+                j = getRandNum(0, Chromosome.CHROMOSOME_SIZE-1);
+                k = getRandNum(0, Day.MAX_EXAMS_IN_SINGLE_SLOT-1);
+                l = getRandNum(0, Day.NO_OF_SLOTS-1);
+                daySlots = days[j].getDaySlots();
+                s = daySlots[k][l];
+            }
+            days[j].getDaySlots()[k][l]
+                    = courseCodesList.get(i);
+        }
+
+        return newChromosome;
+    }
+
+
+    private Population mutatePopulation(Population population) {
+
+        Population mutatedPopulation = new Population(population.getChromosomes().length);
+
+        for(int i=0; i < noOfEliteChromosomes; i++) {
+            mutatedPopulation.getChromosomes()[i] = population.getChromosomes()[i];
+        }
+
+        for(int i = noOfEliteChromosomes; i < population.getChromosomes().length; i++) {
+            mutatedPopulation.getChromosomes()[i] = mutateChromosome(population.getChromosomes()[i]);
+        }
+
+        return mutatedPopulation;
+    }
+
+    private Chromosome mutateChromosome (Chromosome chromosome){
+
+        Chromosome mutateChromosome = new Chromosome();
+
+        for(int i=0; i < chromosome.getGenes().length; i++){
+
+            if(Math.random() < mutationRate){
+                if(Math.random() < 0.5) {
+                    mutateChromosome.getGenes()[i] = 1;
                 }
-                digitValue /= 2;
-            }
-
-            for (boolean b : myChoices) {
-                if (b) {
-                    index += digitValue;
-                }
-                digitValue /= 2;
-            }
-
-            return chromosome[index];
-        }
-
-        @Override
-        public int compareTo(GeneticAlgorithm.Individual o) {
-            return this.score < o.score ? 1 : -1;
-        }
-
-        @Override
-        public String toString() {
-            return "My score is " + score;
-        }
-
-    }
-
-    ArrayList<Individual> population = new ArrayList<Individual>();
-
-    public GeneticAlgorithm() {
-        for (int i = 0; i < POPULATION_SIZE; i++) {
-            population.add(new Individual());
-        }
-    }
-
-    public Individual breed(Individual a, Individual b, int crossover) {
-        Individual c = new Individual();
-
-        for (int i = 0; i < crossover; i++) {
-            c.chromosome[i] = a.chromosome[i];
-        }
-
-        for (int i = crossover; i < CHROMOSOME_SIZE; i++) {
-            c.chromosome[i] = b.chromosome[i];
-        }
-
-        return c;
-    }
-
-    public void mutate(Individual individual) {
-        for (int i = 0; i < individual.chromosome.length; i++) {
-            if (Math.random() < MUTATION_CHANCE) {
-                individual.chromosome[i] = !individual.chromosome[i];
-            }
-        }
-    }
-
-    public void evolveGeneration() {
-        for (int i = 0; i < population.size(); i++) {
-            for (int j = i + 1; j < population.size(); j++) {
-                boolean[] iChoices = new boolean[CHOICE_COUNT];
-                boolean[] jChoices = new boolean[CHOICE_COUNT];
-
-                for (int k = 0; k < GENERATION_ITERATIONS; k++) {
-                    boolean iChoice = population.get(i).makeChoice(jChoices, iChoices);
-                    boolean jChoice = population.get(j).makeChoice(iChoices, jChoices);
-
-                    population.get(i).score += score(true, iChoice, jChoice);
-                    population.get(j).score += score(false, jChoice, iChoice);
-
-                    for (int l = 0; l < CHOICE_COUNT - 1; l++) {
-                        iChoices[l + 1] = iChoices[l];
-                        jChoices[l + 1] = jChoices[l];
-                    }
-
-                    iChoices[0] = iChoice;
-                    jChoices[0] = jChoice;
+                else {
+                    mutateChromosome.getGenes()[i] = 0;
                 }
             }
-        }
-
-        population.sort(new Comparator<Individual>() {
-            @Override
-            public int compare(GeneticAlgorithm.Individual o1, GeneticAlgorithm.Individual o2) {
-                return o1.compareTo(o2);
+            else {
+                mutateChromosome.getGenes()[i] = chromosome.getGenes()[i];
             }
-        });
-
-        ArrayList<Individual> nextPopulation = new ArrayList<Individual>();
-
-        for (int i = 1; i < population.size(); i += 2) {
-            int crossover = (int) Math.floor(Math.random() * CHOICE_COUNT);
-            nextPopulation.add(breed(population.get(i - 1), population.get(i), crossover));
-            nextPopulation.add(breed(population.get(i), population.get(i - 1), crossover));
         }
 
-        for (Individual individual : nextPopulation) {
-            mutate(individual);
-        }
+        return mutateChromosome;
     }
 
-    public Individual getBestIndividual() {
-        for (int i = 0; i < population.size(); i++) {
-            for (int j = i + 1; j < population.size(); j++) {
-                for (int k = 0; k < GENERATION_ITERATIONS; k++) {
-                    boolean[] iChoices = new boolean[CHOICE_COUNT];
-                    boolean[] jChoices = new boolean[CHOICE_COUNT];
+    private Population selectTournamentPopulation(Population population) {
 
-                    boolean iChoice = population.get(i).makeChoice(jChoices, iChoices);
-                    boolean jChoice = population.get(j).makeChoice(iChoices, jChoices);
+        Population tournamentPopulation = new Population(tournamentSelectionSize);
 
-                    population.get(i).score += score(true, iChoice, jChoice);
-                    population.get(j).score += score(false, jChoice, iChoice);
-                }
-            }
+        for (int i=0; i< tournamentSelectionSize; i++) {
+            tournamentPopulation.getChromosomes()[i] = population.getChromosomes()[(int)(Math.random()*population.getChromosomes().length)];
         }
 
-        population.sort(new Comparator<Individual>() {
-            @Override
-            public int compare(GeneticAlgorithm.Individual o1, GeneticAlgorithm.Individual o2) {
-                return o1.compareTo(o2);
-            }
-        });
+        tournamentPopulation.sortChromosomesByFitness();
 
-        return population.get(0);
-    }
+        return tournamentPopulation;
 
-    public static void main(String[] args) {
-        GeneticAlgorithm GA = new GeneticAlgorithm();
-
-        for (int i = 0; i < GENERATIONS; i++) {
-            GA.evolveGeneration();
-        }
-
-        boolean[] bestChromosome = GA.getBestIndividual().chromosome;
-
-        for (boolean b : bestChromosome) {
-            if (b)
-                System.out.print('1');
-            else
-                System.out.print('0');
-        }
     }
 
 }

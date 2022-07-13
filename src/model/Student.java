@@ -1,3 +1,5 @@
+package model;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -67,7 +69,7 @@ public class Student {
     }
 
     public HashMap<String, String> getAssignedExams() {
-        return assignedExams;
+        return this.assignedExams;
     }
 
     public void setAssignedExams(HashMap<String, String> assignedExams) {

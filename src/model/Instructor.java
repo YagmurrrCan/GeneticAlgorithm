@@ -1,3 +1,5 @@
+package model;
+
 public class Instructor {
 
     String instructorId;  // excelde->kod
@@ -5,12 +7,19 @@ public class Instructor {
     String program;
     String instructorAvaibility;
 
+    @Override
+    public String toString() {
+        return "Instructor{" +
+                "instructorId='" + instructorId + '\'' +
+                '}';
+    }
+
     public Instructor(String instructorId) {
         super();
         this.instructorId=instructorId;
     }
 
-    public Instructor(String id, String faculty, String program, String instructorAvaibility) {
+    public Instructor(String instructorId, String faculty, String program, String instructorAvaibility) {
         super();
         this.instructorId = instructorId;
         this.faculty = faculty;

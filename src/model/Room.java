@@ -1,21 +1,19 @@
+package model;
+
 public class Room {
 
     String roomId;
-    String roomName;
     String building;
     int number;
-    String capacity;
+    String seatingCapacity;
 
 
-    Room(String roomId, String roomName, String building, int number, String capacity) {
+    Room(String roomId, String building, int number, String seatingCapacity) {
+        super();
         this.roomId = roomId;
-        this.roomName = roomName;
         this.building = building;
         this.number = number;
-        this.capacity = capacity;
-    }
-
-    public Room(String id) {
+        this.seatingCapacity = seatingCapacity;
     }
 
     public String getRoomId() {
@@ -24,14 +22,6 @@ public class Room {
 
     public void setRoomId(String roomId) {
         this.roomId = roomId;
-    }
-
-    public String getRoomName() {
-        return roomName;
-    }
-
-    public void setRoomName(String roomName) {
-        this.roomName = roomName;
     }
 
     public int getNumber() {
@@ -50,12 +40,12 @@ public class Room {
         this.building = building;
     }
 
-    public String getCapacity() {
-        return capacity;
+    public String getSeatingCapacity() {
+        return seatingCapacity;
     }
 
-    public void setCapacity(String capacity) {
-        this.capacity = capacity;
+    public void setSeatingCapacity(String seatingCapacity) {
+        this.seatingCapacity = seatingCapacity;
     }
 
 }

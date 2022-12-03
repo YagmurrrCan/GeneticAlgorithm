@@ -2,11 +2,13 @@ package model;
 
 public class Instructor {
 
-    String instructorId;  // excelde->kod
+    String instructorId;  // excelde->kod satırı
     String faculty;
     String program;
+    // The availability of the instructor
     String instructorAvaibility;
 
+    /*
     @Override
     public String toString() {
         return "Instructor{" +
@@ -14,11 +16,14 @@ public class Instructor {
                 '}';
     }
 
+     */
+
     public Instructor(String instructorId) {
         super();
         this.instructorId=instructorId;
     }
 
+    // Constructs an instructor with the given availability
     public Instructor(String instructorId, String faculty, String program, String instructorAvaibility) {
         super();
         this.instructorId = instructorId;

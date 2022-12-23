@@ -8,18 +8,14 @@ public class Exam {
     String examCode;
 
 
-    public Exam(String examName, int studentCount, String examCode) {
+    public Exam(String examName) {
         super();
         this.examName = examName;
-        this.studentCount = studentCount;
         this.examCode = examName.substring(studentCount, 2);
 
-        for (int i=0; i<=50; i++) {
+        for(int i=0;i<50;i++) {
             this.ga[i] = 0;
         }
-    }
-
-    public Exam(String c) {
     }
 
     public String getExamName() {
@@ -38,6 +34,14 @@ public class Exam {
         this.studentCount = studentCount;
     }
 
+    public double[] getGa() {
+        return ga;
+    }
+
+    public void setGa(double[] ga) {
+        this.ga = ga;
+    }
+
     public String getExamCode() {
         return examCode;
     }
@@ -45,4 +49,5 @@ public class Exam {
     public void setExamCode(String examCode) {
         this.examCode = examCode;
     }
+
 }

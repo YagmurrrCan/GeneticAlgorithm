@@ -282,7 +282,6 @@ public class Main {
         return midCost;
     }
 
-
    /*
     Bu metod, bir öğrencinin aynı gün içinde almış olduğu sınav sayısını kontrol eder.
     Eğer bir öğrencinin aynı gün içinde 3'ten fazla sınavı varsa, maliyeti artırır.

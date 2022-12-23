@@ -26,6 +26,25 @@ public class Solution {
         this.assignedRooms = assignedRooms;
     }
 /*
+    private List<AssignedRoom> assignedRooms;
+    private List<AssignedInstructor> assignedInstructors;
+
+    public Solution(List<AssignedRoom> assignedRooms, List<AssignedInstructor> assignedInstructors) {
+        this.assignedRooms = assignedRooms;
+        this.assignedInstructors = assignedInstructors;
+    }
+
+    public boolean isValid() {
+        // Implement the logic to check if this solution is valid.
+        // A solution is considered valid if all rooms and instructors are available during the
+        // assigned timeslots, and there are no conflicting assignments.
+        // Return true if the solution is valid, and false otherwise.
+        // ...
+
+        return true;
+    }
+}
+
     public List<Solution> assignRooms(int[] genes) {
         // Öğrenci grubunun sınav salonlarına atama işlemini gerçekleştirir
 

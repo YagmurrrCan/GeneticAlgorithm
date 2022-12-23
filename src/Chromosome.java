@@ -12,7 +12,7 @@ public class Chromosome {
     Main main = new Main();
 
     private int[] genes;
-    private double fitness = -1;  //0 olabilir
+    private double fitness = -1;  //0
     boolean isFitnessChanged = true;
     private int geneLength = 75;
     private int numbOfConflicts = 0;

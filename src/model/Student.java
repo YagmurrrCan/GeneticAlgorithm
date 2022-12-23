@@ -1,3 +1,7 @@
+/*
+Bu sınıf, öğrenciler için bir "Student" sınıfı oluşturuyor gibi görünüyor. Sınıfın içinde öğrenci numarası, öğrencinin okuduğu program (course), öğrencinin almış olduğu sınıflar (classes) ve öğrenciye atanmış sınavlar (assignedExams) gibi bilgileri saklamak için birkaç özellik (field) tanımlanmış. Ayrıca, öğrencinin sınıflarına yeni bir sınıf eklemeyi (addToClasses) ve belirli bir sınıfın öğrencinin sınıfları arasında olup olmadığını kontrol etmeyi (classExist) sağlayan iki adet yöntem (method) de var.
+ */
+
 package model;
 
 import java.util.ArrayList;

@@ -1,3 +1,7 @@
+
+/*
+Bu sınıf, bir "SlotCounter" sınıfı oluşturuyor gibi görünüyor. Sınıfın içinde bir sınavın numarası (examId) ve her bir zaman dilimine ait atamaların sayısını tutan bir dizi (count) gibi bilgileri saklamak için birkaç özellik (field) tanımlanmış. Sınıfın içinde, bir zaman dilimine ait atama sayısını artırmak için "increaseCount" adlı bir metod da mevcut.
+ */
 package model;
 
 public class SlotCounter {

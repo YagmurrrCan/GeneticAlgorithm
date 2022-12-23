@@ -1,3 +1,7 @@
+/*
+Bu sınıf, bir "Instructor" sınıfı oluşturuyor gibi görünüyor. Sınıfın içinde öğretim elemanının numarası (instructorId), öğretim elemanının hangi fakültede çalıştığı (faculty), öğretim elemanının hangi programda ders verdiği (program) ve öğretim elemanının mevcut olup olmadığı (instructorAvailability) gibi bilgileri saklamak için birkaç özellik (field) tanımlanmış.
+ */
+
 package model;
 
 public class Instructor {
@@ -7,16 +11,6 @@ public class Instructor {
     String program;
     // The availability of the instructor
     String instructorAvaibility;
-
-    /*
-    @Override
-    public String toString() {
-        return "Instructor{" +
-                "instructorId='" + instructorId + '\'' +
-                '}';
-    }
-
-     */
 
     public Instructor(String instructorId) {
         super();

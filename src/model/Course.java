@@ -1,3 +1,6 @@
+/*
+Bu sınıf, bir "Course" sınıfı oluşturuyor gibi görünüyor. Sınıfın içinde dersin numarası (courseId), dersin sınavı (exam), dersin adı (name), dersin maksimum öğrenci sayısı (maxNumbOfStudents) ve dersi veren öğretim elemanlarının listesi (instructors) gibi bilgileri saklamak için birkaç özellik (field) tanımlanmış.
+ */
 package model;
 
 import java.util.ArrayList;

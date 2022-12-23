@@ -1,19 +1,23 @@
+/*
+Bu sınıf, bir "Room" sınıfı oluşturuyor gibi görünüyor. Sınıfın içinde odanın numarası (roomId), odanın adı (roomName), oda hangi binada (building), hangi numarada (number) ve kaç kişilik bir kapasiteye sahip olduğu (seatingCapacity) gibi bilgileri saklamak için birkaç özellik (field) tanımlanmış. Ayrıca, oda mevcut olup olmadığını (availability) belirten bir boolean değişken de var.
+ */
+
 package model;
 
 public class Room {
 
     String roomId;
-    String name;
+    String roomName;
     String building;
     int number;
     String seatingCapacity;
     boolean availability; /*isFull*/
 
 
-    Room(String roomId, String name, String building, int number, String seatingCapacity) {
+    Room(String roomId, String roomName, String building, int number, String seatingCapacity) {
         super();
         this.roomId = roomId;
-        this.name = name;
+        this.roomName = roomName;
         this.building = building;
         this.number = number;
         this.seatingCapacity = seatingCapacity;
@@ -33,12 +37,20 @@ public class Room {
         this.roomId = roomId;
     }
 
-    public String getName() {
-        return name;
+    public String getRoomName() {
+        return roomName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setRoomName(String roomName) {
+        this.roomName = roomName;
+    }
+
+    public boolean isAvailability() {
+        return availability;
+    }
+
+    public void setAvailability(boolean availability) {
+        this.availability = availability;
     }
 
     /*

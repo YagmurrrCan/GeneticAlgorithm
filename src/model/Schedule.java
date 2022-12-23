@@ -1,3 +1,7 @@
+/*
+Bu sınıf, bir "Schedule" sınıfı oluşturuyor gibi görünüyor. Sınıfın içinde çizelge numarası (scheduleId) ve toplantı zamanı (meetingTime) gibi bilgileri saklamak için birkaç özellik (field) tanımlanmış.
+ */
+
 package model;
 
 public class Schedule {

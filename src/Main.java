@@ -136,7 +136,7 @@ public class Main {
         String currentExamTimeslot = null;
         String nextExamTimeslot = null;
 
-        for(int i=0 i< exams.size(); i++) { // i also denotes current exam id
+        for(int i=0; i< exams.size(); i++) { // i also denotes current exam id
             currentExam = exams.get(i).getExamName();
             currentExamTimeslot = firstSolution.get(currentExam);
             int cet = Integer.parseInt(currentExamTimeslot);

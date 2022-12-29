@@ -1,5 +1,12 @@
 import java.io.IOException;
 import java.util.Random;
+/*
+crossoverPopulation()" metodu, verilen Population nesnesinin ilk bireylerini elit bireyler olarak saklar ve diğer bireyler için "selectTournamentPopulation()" metodu ile turnuva seçimi yapar. Daha sonra bu turnuva seçiminden çıkan Chromosome örnekleri arasından rastgele iki tane seçilerek "crossoverChromosome()" metodu ile çaprazlama işlemi gerçekleştirilir.
+
+"mutatePopulation()" metodu ise, verilen Population nesnesinin ilk bireylerini elit bireyler olarak saklar ve diğer bireyler için "mutateChromosome()" metodu ile mutasyon işlemi gerçekleştirilir.
+
+Bu sınıfta ayrıca, turnuva seçimi için kullanılacak "selectTournamentPopulation()" metodu ve Chromosome örnekleri arasında çaprazlama işlemi gerçekleştirilen "crossoverChromosome()" metodu da bulunmaktadır.
+ */
 
 public class GeneticAlgorithm {
 
@@ -22,7 +29,6 @@ public class GeneticAlgorithm {
             Chromosome chromosome1 = selectTournamentPopulation(population).getChromosomes()[0];
             Chromosome chromosome2 = selectTournamentPopulation(population).getChromosomes()[0];
             crossoverPopulation.getChromosomes()[i] = crossoverChromosome(chromosome1, chromosome2);
-
 
         }
         return crossoverPopulation;

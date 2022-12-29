@@ -1,10 +1,7 @@
 import model.Solution;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-import java.util.Vector;
+import java.util.*;
 
 //Individuals
 public class Chromosome {
@@ -73,29 +70,29 @@ public class Chromosome {
         // Implement the logic to calculate the fitness value for this chromosome.
         // The higher the fitness value, the more suitable the chromosome is for
         // the problem at hand.
-        double fitness = 0;
+        double totalFitness = 0;
 
-        /*
-        assignRooms metodu, öğrenci grubunun sınav salonlarına atama işlemini gerçekleştirir ve atamanın nasıl yapıldığını gösteren bir List<Solution> nesnesi döndürür.
+        for (int i = 0; i < genes.length; i++) {
+           label:
+            if(genes[i] == 1) {
+                if( totalFitness + Main.checkHardConstraints().get(i)){
+                Random rand = new Random();
 
-isValid metodu ise, bir Solution nesnesinin geçerli olup olmadığını kontrol eder. Eğer Solution geçerli ise, true değerini döndürür; aksi takdirde false değerini döndürür.
-         */
-/*
-        // Öğrenci grubunun sınav salonlarına atamasını yap
-        List<Solution> solutions = assignRooms(genes);
-        // Sınav salonlarına atamanın başarılı olup olmadığını kontrol et
-        for (Solution solution : solutions) {
-            if (solution.isValid()) {
-                // Sınav salonlarına atamanın başarılı olduğunu göster
-                fitness += 1;
+                // nextInt as provided by Random is exclusive of the top value so you need to add 1
+
+                int randomPosition = rand.nextInt(geneLength);
+                genes[randomPosition]=0;
+                totalFitness=0;
+                i=0;
+                break label;
+            }
+                double totalFitness = hardConstraintsFitness + softConstraintsFitness;
             }
         }
-
- */
-        return fitness;
+        return totalFitness;
     }
 
-/* Bu crossover metodu, rastgele bir kesişim (crossover) noktası seçer ve iki Chromosome nesnesinin genlerini bu noktada kesiştirir. */
+    /* Bu crossover metodu, rastgele bir kesişim (crossover) noktası seçer ve iki Chromosome nesnesinin genlerini bu noktada kesiştirir. */
     public Chromosome crossover(Chromosome other) {
         // Perform crossover with another chromosome to produce new offspring.
         // This might involve randomly selecting genes from each parent

@@ -16,35 +16,34 @@ public class Student {
    // private String studentSurname;
    // private String departmentId;
     private String course; //program
+    private int maxExamCount;
 
-    private Vector<String> classes = new Vector<>();
+    private Vector<String> exams = new Vector<>();
     HashMap<String,String> assignedExams = new HashMap<>();
 
     public Student(String studentId) {
         this.studentId = studentId;
     }
 
-    public Student(String studentId, String course, String examName, Vector<String> classes) {
+    public Student(String studentId, String course, Vector<String> exams) {
         super();
         this.studentId = studentId;
         this.course = course;
-        this.classes = classes;
+        this.exams = exams;
     }
 
-   // List<Student> list = new ArrayList<Student>();
+    public void addToExams(String newClass) {
 
-    public void addToClasses(String newClass) {
-
-        if(!classExist(newClass)) {
-            this.classes.add(newClass);
+        if(!examExist(newClass)) {
+            this.exams.add(newClass);
         }
         else {
 
         }
     }
 
-    public boolean classExist(String name) {
-        return this.classes.stream().filter(o -> o.equals(name)).findFirst().isPresent();
+    public boolean examExist(String name) {
+        return this.exams.stream().filter(o -> o.equals(name)).findFirst().isPresent();
     }
 
     /*Getter & Setter*/
@@ -64,12 +63,12 @@ public class Student {
         this.course = course;
     }
 
-    public Vector<String> getClasses() {
-        return classes;
+    public Vector<String> getExams() {
+        return exams;
     }
 
-    public void setClasses(Vector<String> classes) {
-        this.classes = classes;
+    public void setExams(Vector exams) {
+        this.exams = exams;
     }
 
     public HashMap<String, String> getAssignedExams() {
@@ -80,4 +79,11 @@ public class Student {
         this.assignedExams = assignedExams;
     }
 
+    public int getMaxExamCount() {
+        return maxExamCount;
+    }
+
+    public void setMaxExamCount(int maxExamCount) {
+        this.maxExamCount = maxExamCount;
+    }
 }

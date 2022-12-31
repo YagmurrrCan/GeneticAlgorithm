@@ -18,6 +18,50 @@ import java.util.*;
 
 public class Main {
 
+    public static void main(String[] args) throws InterruptedException, IOException {
+
+        readStudentsFile();
+        readInstructorFile();
+        readRoomFile();
+        readExamsFile();
+
+        findStudentSizeForExam();
+        createAssignmentForRooms();
+
+        initializeExamTimeslotCounters();
+
+        System.out.println("> Students: " + students.size());
+        System.out.println("> Exams: " + exams.size());
+        System.out.println("> Rooms: " + rooms.size());
+        System.out.println("> Instructors: " + instructor.size());
+        System.out.println("\n\n");
+        System.err.print(">> Genetic Algorithm running...");
+
+        Population population = new Population(GeneticAlgorithm.populationSize).initializePopulation();
+        GeneticAlgorithm ga = new GeneticAlgorithm();
+
+        System.out.println("------------------------");
+        System.out.println("Generation #0" + "| Fittest chromosome fitness:" + population.getChromosomes()[0].getFitness());
+        printPopulation(population);
+
+        int generationNumber = 0;
+
+        while (generationNumber < 50) {
+            generationNumber++;
+            System.out.println("\n ---------------------------------------------------------------------------------------------------------------------------------------");
+            population = ga.evolve(population);
+            population.sortChromosomesByFitness();
+            System.out.println("Generation #" + generationNumber + " | Fittest chromosome fitness:" + population.getChromosomes()[0].getFitness());
+            printPopulation(population);
+        }
+
+        System.out.println();
+        System.err.print(">> End.");
+    }
+
+    Chromosome chromosome = new Chromosome();
+    int[] genes = chromosome.getGenes();
+
     //add-remove operation, excel data
     static List<Student> students = new Vector<Student>();
     static List<Instructor> instructor = new Vector<Instructor>();
@@ -33,20 +77,7 @@ public class Main {
     static List<AssignedRoom> assignedRooms = new Vector<>();
     static List<AssignedInstructor> assignedInstructors = new Vector<>();
 
-    //GENETIC-ALGORITHM
-    static List<GeneticAlgorithm> ga = new ArrayList<>(); //Vector
-    static int[][] conflictMatrix;
-
-    final static int weight_order1 = 16; // student max exam sc
-    final static int weight_order2 = 8; // student overload sc
-    final static int weight_order3 = 4; // time period sc
-    final static int weight_order4 = 2; //
-    final static int weight_order5 = 1;
-
-    static Random r;
-    static int seed = 0;
-    static int iterationCounter = 0;
-    static int maxIteration = 0;
+    static List<GeneticAlgorithm> ga = new Vector<>(); //ArrayList
 
     public static boolean studentExist(String id) {
         return students.stream().anyMatch(o -> o.getStudentId().equals(id)); //filter(o -> o.getStudentId().equals(id)).findFirst().isPresent();
@@ -76,677 +107,56 @@ public class Main {
         return students.indexOf(students.stream().filter(o -> o.getStudentId().equals(studentno)).findFirst().orElse(null)); //get());
     }
 
-    // ConflictMatrix, sınavlar arasındaki çakışmaları belirtir.
-    // sınav 1 ile sınav 2 arasında bir çakışma varsa, matrisin [1][2] pozisyonu bir artırılır. Sınav 1 ile sınav 3 arasında da bir çakışma varsa, matrisin [1][3] pozisyonu da bir artırılır.
-    public static void createConflictMatrix() {
-
-        conflictMatrix = new int[exams.size()][exams.size()];
-
-        int studentIterator = 0;
-        while (studentIterator < students.size()) {
-
-            Student currentStudent = students.get(studentIterator);
-            Vector<String> currentExams = currentStudent.getExams();
-
-            for (int i = 0; i < currentExams.size(); i++) {
-                /*
-                 * for class x of student y
-                 * check every other classes of the student y
-                 * and increases the old value which is initially 0
-                 */
-
-                String currentExam = currentExams.get(i);
-                int idOfCurrentExam = findExamByName(currentExam);
-
-                for (int j = i + 1; j < currentExams.size(); j++) {
-                    String nextExam = currentExams.get(j);
-                    int idOfNextExam = findExamByName(nextExam);
-
-                    int oldConflict = conflictMatrix[idOfCurrentExam][idOfNextExam];
-                    int oldConflictReverse = conflictMatrix[idOfNextExam][idOfCurrentExam];
-                    conflictMatrix[idOfCurrentExam][idOfNextExam] = oldConflict + 1;
-                    conflictMatrix[idOfNextExam][idOfCurrentExam] = oldConflictReverse + 1;
-                }
-            }
-            studentIterator++;
-        }
-    }
-
-    public static void softConstraintStudentOverload(HashMap<String, String> solution, double[][] populationFitness) {
-        double softConstraintFactor = 0.2; // Yumuşak kısıt faktörünün değeri
-        double baseValue = 0.5; // Temel değer, sınavların fitness değerlerinin en düşük olmasını sağlar
-
-        HashMap<String, Double> counterTable = new HashMap<>(); // Öğrencilerin sınav sayılarını tutacak tablodaki anahtar: sınav adı, değer: sınav sayısı
-        // Öğrenciler dizisini dolaşır ve her öğrencinin sınavlarını tutan bir Vektör nesnesine ulaşır
-        for (Student s : students) {
-            Vector<String> currentStudentExams = s.getExams();
-            // Her öğrencinin sınavlarını dolaşır ve her sınav için bir sonraki sınavı arar
-            for (int i = 0; i < currentStudentExams.size(); i++) {
-                String currentExam = currentStudentExams.get(i);
-                int currentExamId = findExamByName(currentExam);
-                // Eğer iki sınav arasındaki zaman aralığı 1 ise, bu
-            }
-        }
-    }
-
-    public static void hardConstraintPartialSolution(HashMap<String, String> firstSolution) {
-
-        String currentExam = null;
-        String nextExam = null;
-        String currentExamTimeslot = null;
-        String nextExamTimeslot = null;
-
-        for(int i=0; i< exams.size(); i++) { // i also denotes current exam id
-            currentExam = exams.get(i).getExamName();
-            currentExamTimeslot = firstSolution.get(currentExam);
-            int cet = Integer.parseInt(currentExamTimeslot);
-
-            for(int m=i+1; m < exams.size(); m++) { // m denotes next exam id
-                nextExam = exams.get(m).getExamName();
-                nextExamTimeslot = firstSolution.get(nextExam);
-                int net = Integer.parseInt(nextExamTimeslot);
-
-                if(conflictMatrix[i][m]>0 && currentExamTimeslot==nextExamTimeslot) {
-                    exams.get(i).heuristics[cet] = Double.MAX_VALUE;
-                }else {
-                }
-            }
-        }
-        editHeuristics();
-    }
-
-    public static boolean checkHardConstraints(HashMap<String, String> examTimetable) {
-        // Sınavlar aynı anda yapılmamalıdır.
-        for (String exam1 : examTimetable.keySet()) {
-            String timeslot1 = examTimetable.get(exam1);
-            for (String exam2 : examTimetable.keySet()) {
-                String timeslot2 = examTimetable.get(exam2);
-                if (exam1.equals(exam2)) {
-                    continue;
-                }
-                if (timeslot1.equals(timeslot2)) {
-                    return false;
-                }
-            }
-        }
-        // Diğer hard constraintlerinizi buraya ekleyebilirsiniz.
-        return true;
-    }
-
-    public static boolean violatesHardConstraint( ArrayList<Integer> possibleTimeslotsTable, HashMap<String, String> partialSolution, Exam e, int nextTimeslot) {
-
-        if(nextTimeslot==-1) {
-            return true;
-        }else {
-
-            String currentExam = null;
-            String nextExam = null;
-
-            for(Student currentStudent:students) {
-                Vector<String> currentStudentClasses = currentStudent.getExams();
-
-                for(int i=0;i<currentStudentClasses.size();i++) {
-                    currentExam = currentStudentClasses.get(i);
-                    nextExam = e.getExamName();
-
-                    int currentExamId = findExamByName(currentExam);
-                    int nextExamId = findExamByName(e.getExamName());
-
-                    String currentTimeslot = partialSolution.get(currentExam);
-
-                    if(currentTimeslot!=null) {
-                        if(conflictMatrix[currentExamId][nextExamId]>0) {
-                            // if they are two conflicting exams:
-                            if(currentTimeslot == String.valueOf(nextTimeslot)) {
-                                removeFromTimeslotTable(possibleTimeslotsTable, nextTimeslot);
-                                return true;
-                            }
-                        }else {
-                            // if not conflicting no reason to not use the timeslot
-                            return false;
-                        }
-                    }else {
-                        // the exam still not assigned not possible to cause a conflict
-                        return false;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    public static void writeTable() throws IOException {
-
-        XSSFWorkbook workbook = new XSSFWorkbook();
-
-        XSSFSheet spreadsheet = workbook.createSheet(" Student Data ");
-
-        XSSFRow row;
-
-        // This data needs to be written (Object[])
-        Map<String, Object[]> studentData = new TreeMap<String, Object[]>();
-
-        studentData.put(
-                "1",
-                new Object[] { "Roll No", "NAME", "Year" });
-
-        studentData.put("2", new Object[] { "128", "Aditya",
-                "2nd year" });
-
-        studentData.put(
-                "3",
-                new Object[] { "129", "Narayana", "2nd year" });
-
-        studentData.put("4", new Object[] { "130", "Mohan",
-                "2nd year" });
-
-        studentData.put("5", new Object[] { "131", "Radha",
-                "2nd year" });
-
-        studentData.put("6", new Object[] { "132", "Gopal",
-                "2nd year" });
-
-        Set<String> keyid = studentData.keySet();
-
-        int rowid = 0;
-
-        for (String key : keyid) {
-
-            row = spreadsheet.createRow(rowid++);
-            Object[] objectArr = studentData.get(key);
-            int cellid = 0;
-
-            for (Object obj : objectArr) {
-                Cell cell = row.createCell(cellid++);
-                cell.setCellValue((String)obj);
-            }
-        }
-
-        FileOutputStream out = new FileOutputStream(new File("C:/savedexcel/GFGsheet.xlsx"));
-
-        workbook.write(out);
-        out.close();
-    }
-
-    /* Bu metod, bir sınav zamanlama senaryosu için çakışma matrisini oluşturur. Bu metod, bir students dizisi içindeki öğrencilerin sınavlarını kontrol ederek, sınavlar arasındaki çakışmaları belirtir. Örneğin, sınav 1 ve sınav 2 arasında bir çakışma varsa, matrisin bu iki sınavı temsil eden hücrelerinde bir "1" değeri bulunur.
-
- Bu metod, ayrıca findExamByName() adlı bir yardımcı metod kullanarak, bir sınavın adını kullanarak sınavın ID'sini bulur. Bu ID, daha sonra çakışma matrisini oluşturmak için kullanılır.
-
- Bu metod, bir sınav zamanlama senaryosu için bir "çözümün geçerliliğini" değerlendirir. Bu çözüm, bir "parçalı çözüm" olarak adlandırılır ve bir sınavın belirli bir zaman aralığına atandığı bir "çözüm parçası" içerir. Bu metod, bu çözüm parçasının bir sınavın belirli bir zaman aralığına atandığı diğer çözüm parçalarıyla oluşan tam bir sınav zamanlama çözümünün geçerliliğini değerlendirir.
-     partialSolution: Bir sınavın belirli bir zaman aralığına atandığı çözüm parçalarını tutan bir hash tablosu.
-             nextExam: Değerlendirilecek olan sonraki sınavın adı.
-             nextTimeslot: Sonraki sınavın atanacağı zaman aralığı.
- */
-    //static HashMap<Integer, Boolean> chosenExamsTable = new HashMap<>();
-    //static HashMap<Integer, Integer> chosenFrequencyTable = new HashMap<Integer, Integer>();
-    List<int[]> eligibleSolutions = new ArrayList<int[]>();
-
-    static ArrayList<Integer> possibleTimeslotsTable = new ArrayList<>();
-    public static void resetTimeslotTable(ArrayList<Integer> timeslotTable) {
-        possibleTimeslotsTable.clear();
-        for(int i=0; i<50; i++) {
-            possibleTimeslotsTable.add(i);
-        }
-    }
-
-    //ALOOOO
-    public static void resetExamTimeslotCounters() {
-        for(int i=0; i < examTimeslotCounters.size(); i++) { // iterate over etc
-            for(int m=0; m < 50; m++) { // iterate over the etc's count array
-                examTimeslotCounters.get(i).count[m] = 0;
-            }
-        }
-    }
     public static void initializeExamTimeslotCounters() {
 
-        for(int i=0; i<exams.size(); i++) {
+        for (int i = 0; i < exams.size(); i++) {
             examTimeslotCounters.add(new SlotCounter(i));
         }
     }
 
-    static double evaluatePartialSolution(HashMap<String, String> partialSolution, String nextExam, String nextTimeslot) throws InterruptedException {
-
-        double cost = 0;
-        cost = firstSoftC(partialSolution, nextExam, nextTimeslot);
-        cost = secondSoftC(cost, partialSolution, nextExam, nextTimeslot);
-
-        return cost;
-    }
-
- /*   Bu metod, bir sınav zamanlama senaryosu için en uygun zaman aralığını bulur. Bu metod, bir "parçalı çözüm" olarak adlandırılan bir sınavın belirli bir zaman aralığına atandığı çözüm parçaları ve bir sonraki sınavın adını kullanarak çalışır. Bu metod, değerlendirilen sınavın zaman aralıklarına atanma olasılıklarını hesaplar ve en yüksek olasılığa sahip zaman aralığını döndürür.   */
-    static int returnHighesTimeslot(HashMap<String, String> partialSolution, String nextExam) throws InterruptedException {
-        int highestTimeslot = -1;
-        // En yüksek olasılığı saklayan değişken
-        double maxProbability = Double.MAX_VALUE;
-
-        // Tüm zaman aralıklarını dolaş
-        for (int i = 0; i < timeslots.length; i++) {
-            /*// Sınavın zaman aralığına atanma olasılığını hesapla
-    double probability = evaluatePartialSolution(partialSolution, nextExam, String.valueOf(i));
-
-             // Olasılık en yüksekse, zaman aralığını güncelle
-    if (probability > maxProbability) {
-      highestTimeslot = i;
-      maxProbability = probability;
-    }
-  }
-
-  // En yüksek zaman aralığını döndür
-  return highestTimeslot;
-}
-  */
-            if ((evaluatePartialSolution(partialSolution, nextExam, String.valueOf(i))) > maxProbability) {
-                highestTimeslot = i;
-            }
-        }
-
-        return highestTimeslot;
-    }
-
-    /*Bu metod, bir sınav zamanlama senaryosu için "yumuşak kısıtları" değerlendirir.
-    Yumuşak kısıtlar, bir sınav zamanlama çözümünün geçerliliğini etkileyen faktörlerdir ve bu faktörlerin ağırlıkları düşük olabilir.
-    Örneğin, bir öğrencinin aynı anda birden fazla sınavı olması bir yumuşak kısıttır ve bu kısıtın ağırlığı düşük olabilir.
-
-    Bu metod, aşağıdaki parametreleri kullanarak çalışır:
-
-    cost: Değerlendirilen çözümün maliyeti.
-    ga: Bir sınavın belirli bir zaman aralığına atandığı çözüm parçalarını tutan bir hash tablosu.
-    nextExam: Değerlendirilecek olan sonraki sınavın adı.
-    nextTimeslot: Sonraki sınavın atanacağı zaman aralığı.
-
-     */
-    static double secondSoftC(double cost, HashMap<String, String> ga, String nextExam, String nextTimeslot) throws InterruptedException {
-
-        // Weight of soft constraints
-        /* Bu değer, yumuşak kısıtların ağırlığını temsil eder.
-        Yumuşak kısıtlar, bir sınav zamanlama çözümünün geçerliliğini etkileyen faktörlerdir ve bu faktörlerin ağırlıkları düşük olabilir.
-        Örneğin, bir öğrencinin aynı anda birden fazla sınavı olması bir yumuşak kısıttır ve bu kısıtın ağırlığı düşük olabilir.
-        Bu yumuşak kısıtların ağırlığı, uygulamanın ihtiyaçlarına göre değiştirilebilir.
-        Örneğin, eğer yumuşak kısıtların önemi daha yüksekse, bu değer daha yüksek bir değere ayarlanabilir.
-        Ancak, unutmayın ki bu değerin düşük olması, yumuşak kısıtların önemini azaltmaz, sadece bu kısıtların çözüme etkisinin daha düşük olacağı anlamına gelir.
-         */
-        double softConstraintFactor = 0.3;
-
-        // Student exam counter
-        int studentExamCounter = 0;
-
-        // Store the cost of the current solution
-        double midCost = cost;
-
-        // 2) having more than 2 exams increases cost
-        //Öğrencileri döngü ile gez
-        for (Student s : students) {
-
-            // Mevcut öğrencinin sınavlarını tut
-            //This code stores the exams of the current student
-            Vector<String> currentStudentExams = s.getExams();
-
-            for (int i = 0; i < currentStudentExams.size(); i++) {
-
-                studentExamCounter = 0;
-                String currentExam = currentStudentExams.get(i);
-
-                // Öğrencinin mevcut sınavının zaman aralığını tut
-                int currentExamTimeslot = Integer.parseInt(ga.get(currentExam));
-                int nextExamTimeslot = Integer.parseInt(nextTimeslot);
-
-                if (timeslots[currentExamTimeslot][2] == timeslots[nextExamTimeslot][2]) {
-                    // means they are assigned to the same week
-                    if (timeslots[currentExamTimeslot][1] == timeslots[nextExamTimeslot][1]) {
-                        // means they are assigned to the same day
-                        // Öğrenci, mevcut sınavının atandığı zaman aralığında başka bir sınavı da alıyorsa sayacı artır
-                        studentExamCounter++;
-
-                        // Eğer sayaç 2'den büyükse, mevcut çözümün maliyetini artır
-                        if (studentExamCounter > 2) {
-                            midCost = midCost + midCost * softConstraintFactor;
-                        }
-
-                    }
-                }
-            }
-
-
-        }
-        return midCost;
-    }
-
-    static double firstSoftC(HashMap<String, String> ga, String nextExam, String nextTimeslot) throws InterruptedException {
-        double midCost = 0;
-        double softConstraintFactor = 0.2;
-
-        for (Student s : students) {
-            Vector<String> currentStudentExams = s.getExams();
-
-            for (int i = 0; i < currentStudentExams.size(); i++) {
-
-                String currentExam = currentStudentExams.get(i);
-                // Öğrencinin mevcut sınavının zaman aralığını tut
-                int currentExamTimeslot = Integer.parseInt(ga.get(currentExam));
-                int currentExamId = findExamByName(currentExam);
-                int nextExamId = findExamByName(currentExam);
-
-                int nextExamTimeslot = Integer.parseInt(nextTimeslot);
-
-
-                if (Math.abs(currentExamTimeslot - nextExamTimeslot) == 1) {
-
-                    midCost = midCost + midCost * softConstraintFactor;
-
-                } else if (Math.abs(currentExamTimeslot - nextExamTimeslot) == 0) {
-                    // since its looking for a single student
-                    // meaning the classes cant have exams simultaneously
-
-                    System.out.println("Hard constraint fault!!");
-                    //Thread.sleep(5000);
-
-                } else {
-
-
-                }
-            }
-        }
-        return midCost;
-    }
-
-    /*
-    Bu kod, geçmiş sınav ve mevcut sınav arasında bir kısıt olup olmadığını kontrol eden bir yöntemdir. Kısıt olup olmadığını, öğrencilerin sınavlarını tutan conflictMatrix adlı bir matris kullanarak belirler. Eğer iki sınav arasında bir kısıt varsa, yani conflictMatrix matrisinde iki sınavın indeksleri arasında bir değer varsa, bu kod true değerini döndürür. Aksi takdirde, false değerini döndürür. Bu kod, sınav oturumlarının planlanması sırasında kısıtları kontrol etmek için kullanılabilir.
-     */
-    public static boolean isBreakHardConstraint(int pastExam, int currentExam) {
-        if(conflictMatrix[pastExam][currentExam]>0||conflictMatrix[currentExam][pastExam]>0) {
-            return true;
-        }
-        return false;
-    }
-
-   /*
-    Bu metod, bir öğrencinin aynı gün içinde almış olduğu sınav sayısını kontrol eder.
-    Eğer bir öğrencinin aynı gün içinde 3'ten fazla sınavı varsa, maliyeti artırır.
-    */
-
-    public static void partialSoftConstraintStudentMaxExam(HashMap<String, String> ga) throws InterruptedException {
-        double softConstraintFactor = 0.3;
-        int studentExamCounter = 0;
-
-
-        // 2) having more than 2 exams increases cost
-
-        for (Student s : students) {
-            //studentExamCounter=0;
-            Vector<String> currentStudentClasses = s.getExams();
-            for (int i = 0; i < currentStudentClasses.size(); i++) {
-                studentExamCounter = 0;
-                String currentClass = currentStudentClasses.get(i);
-                int currentClassId = findExamByName(currentClass);
-
-                for (int k = i + 1; k < currentStudentClasses.size(); k++) {
-
-                    if (i == k) {
-                        // do nothing
-                    } else {
-                        String nextClass = currentStudentClasses.get(k);
-                        int nextClassId = findExamByName(nextClass);
-
-                        int currentClassTimeslot = Integer.parseInt(ga.get(currentClass));
-                        int nextClassTimeslot = Integer.parseInt(ga.get(nextClass));
-
-                        Exam e1 = exams.get(currentClassId);
-                        Exam e2 = exams.get(nextClassId);
-
-
-                        if (timeslots[currentClassTimeslot][2] == timeslots[nextClassTimeslot][2]) {
-                            // means they are assigned to the same week
-                            if (timeslots[currentClassTimeslot][1] == timeslots[nextClassTimeslot][1]) {
-                                // means they are assigned to the same day
-                                studentExamCounter++;
-                                if (studentExamCounter > 2) {
-
-                            /*
-                                    ga.setFitness(ga.getFitness() + ga.getFitness() * softConstraintFactor);
-                             */
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    public static void softConstraintStudentMaxExam(HashMap<String, String> solution) throws InterruptedException {
-        double softConstraintFactor = 0.3;
-        int studentExamCounter = 0;
-
-        // 2) having more than 2 exams increases cost
-
-        for(Student s:students) {
-            //studentExamCounter=0;
-            Vector<String> currentStudentClasses = s.getExams();
-            for(int i=0;i<currentStudentClasses.size();i++) {
-                studentExamCounter=0;
-                String currentClass = currentStudentClasses.get(i);
-                int currentClassId = findExamByName(currentClass);
-
-                for(int k=i+1;k<currentStudentClasses.size();k++) {
-
-                    if(i==k) {
-                        // do nothing
-                    }else {
-                        String nextClass = currentStudentClasses.get(k);
-                        int nextClassId = findExamByName(nextClass);
-
-                        int currentClassTimeslot =  Integer.parseInt(solution.get(currentClass));
-                        int nextClassTimeslot = Integer.parseInt(solution.get(nextClass));
-
-                        Exam e1 = exams.get(currentClassId);
-                        Exam e2 = exams.get(nextClassId);
-
-
-
-
-                        //double cost = e1.pheromones[currentClassTimeslot];
-
-                        if(timeslots[currentClassTimeslot][2] == timeslots[nextClassTimeslot][2]) {
-                            // means they are assigned to the same week
-                            if(timeslots[currentClassTimeslot][1] == timeslots[nextClassTimeslot][1]) {
-                                // means they are assigned to the same day
-
-
-                                studentExamCounter+=1;
-
-                                if(studentExamCounter>2) {
-
-                                    e1.heuristics[currentClassTimeslot] = e1.heuristics[currentClassTimeslot] + e1.heuristics[currentClassTimeslot]*softConstraintFactor;
-                                    e2.heuristics[nextClassTimeslot] = e2.heuristics[nextClassTimeslot] + e2.heuristics[nextClassTimeslot]*softConstraintFactor;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    public static void partialSoftConstraintStudentOverloadCheck(HashMap<String, String> solution) throws InterruptedException {
-
-        double softConstraintFactor = 0.2;
-        double baseValue = 0.5;
-
-        // 1) having exams back to back increases cost
-
-        HashMap<String, Double> counterTable = new HashMap<>();
-        for(int i=0;i<exams.size();i++) {
-            counterTable.put(exams.get(i).getExamName(), (double) 0);
-        }
-
-
-        for(Student s:students) {
-            Vector<String> currentStudentExams = s.getExams();
-            for(int i=0;i<currentStudentExams.size();i++) {
-
-                String currentExam = currentStudentExams.get(i);
-                int currentExamId = findExamByName(currentExam);
-
-
-                for(int k=i+1;k<currentStudentExams.size();k++) {
-
-                    String nextExam = currentStudentExams.get(k);
-                    int nextExamId = findExamByName(nextExam);
-
-                    int cet =  Integer.parseInt(solution.get(currentExam)); // gives which timeslot it was assigned
-                    int net = Integer.parseInt(solution.get(nextExam));
-
-                    //double cost = e1.pheromones[currentClassTimeslot];
-
-                    if(Math.abs(cet-net)==1) {
-                        //cost = heuristic
-
-                        double oldval = counterTable.get(currentExam);
-                        counterTable.put(currentExam, oldval+1);
-
-                        double nextoldval = counterTable.get(nextExam);
-                        counterTable.put(nextExam, nextoldval+1);
+    public static int calculateHardConstraints() throws IOException {
+        // Calculate hard constraints violations.
+        // These constraints must be satisfied for a solution to be valid.
+        int hardConstraintsViolations = 0;
+        // Iterate through all exams
+        for (int i = 0; i < exams.size(); i++) {
+            Exam exam1 = exams.get(i);
+
+            // Check if this exam overlaps with any other exam in the same timeslot
+            for (int j = 0; j < exams.size(); j++) {
+                if (i != j) {  // Skip self-comparison
+                    Exam exam2 = exams.get(j);
+
+                    // Check if exams are scheduled at the same time
+                    if (exam1.getExamCode().equals(exam2.getExamCode())) {
+                        hardConstraintsViolations++;
                     }
                 }
             }
         }
 
-        for(String key : counterTable.keySet()) {
-            Exam currentExam = exams.get(findExamByName(key));
-            double oldscore = currentExam.heuristics[Integer.parseInt(solution.get(key))];
-            if(oldscore==0) {
-                oldscore = baseValue; // keeping it as min as possible to not control the cost manually
-
-            }
-
-            double editedFactor = softConstraintFactor + 0.1*(counterTable.get(key)-2);
-            currentExam.heuristics[Integer.parseInt(solution.get(key))] = oldscore + (counterTable.get(key))*editedFactor;
-        }
-
-        editHeuristics();
+        return hardConstraintsViolations;
     }
 
-    public static void softConstraintStudentOverloadCheck(HashMap<String, String> solution) throws InterruptedException {
-
-        double softConstraintFactor = 0.2;
-
-        // 1) having exams back to back increases cost
-
-        for(Student s:students) {
-            Vector<String> currentStudentExams = s.getExams();
-            for(int i=0;i<currentStudentExams.size();i++) {
-
-                String currentExam = currentStudentExams.get(i);
-                int currentExamId = findExamByName(currentExam);
-
-
-                for(int k=i+1;k<currentStudentExams.size();k++) {
-
-                    String nextExam = currentStudentExams.get(k);
-                    int nextExamId = findExamByName(nextExam);
-
-                    int currentExamTimeslot =  Integer.parseInt(solution.get(currentExam)); // gives which timeslot it was assigned
-                    int nextExamTimeslot = Integer.parseInt(solution.get(nextExam));
-
-                    Exam e1 = exams.get(currentExamId);
-                    Exam e2 = exams.get(nextExamId);
-
-                    if(Math.abs(currentExamTimeslot-nextExamTimeslot)==1) {
-
-                        e1.heuristics[currentExamTimeslot] = e1.heuristics[currentExamTimeslot] + e1.heuristics[currentExamTimeslot] * softConstraintFactor;
-                        e2.heuristics[nextExamTimeslot] = e2.heuristics[nextExamTimeslot] + e2.heuristics[nextExamTimeslot] * softConstraintFactor;
-
-                    }else if(Math.abs(currentExamTimeslot-nextExamTimeslot)==0) {
-
-                        System.out.println("Hard constraint fault!!");
-
-                    }else {
-
-                    }
+    public static int calculateSoftConstraints() throws IOException {
+        // Calculate soft constraints violations.
+        // These constraints are preferred to be satisfied, but a solution can still be valid if they are not.
+        int softConstraintsViolations = 0;
+        // Iterate through all instructors
+        for (Instructor instructor : instructor) {
+            // Count the number of exams that this instructor is scheduled to proctor in the same timeslot
+            int examCount = 0;
+            for (Exam exam : exams) {
+                if (exam.getExamCode().equals(instructor.getInstructorId()) && exam.getExamCode().equals(instructor.getInstructorAvaibility())) {
+                    examCount++;
                 }
             }
-        }
-    }
-
-    public static double softConstraintExamWeekRelation(double cost, HashMap<String, String> ga) {
-        // Soft constraint faktörü maliyeti kaç kat artıracağını belirler.
-        double softConstraintFactor = 0.1;
-
-        // En fazla öğrenci sayısına sahip sınavı bulun.
-        int maxExam = 0;
-        int index = -1;
-
-        for (int x = 0; x < examStudentSize.length; x++) {
-            if (maxExam < examStudentSize[x]) {
-                maxExam = examStudentSize[x];
-                index = x;
+            // If the instructor is proctoring more than 1 exam in the same timeslot, increment the number of soft constraints violations
+            if (examCount > 1) {
+                softConstraintsViolations += examCount - 1;
             }
         }
-
-        // En fazla öğrenci sayısına sahip sınavın zaman dilimini alın.
-        String timeslot = ga.get(exams.get(index).getExamName());
-        // Sınavın 2. hafta içinde yapılmasını tercih ediyorsak, maliyeti artırın.
-        if (Integer.parseInt(timeslots[Integer.parseInt(timeslot)][2]) == 2) {
-            cost = cost + cost * softConstraintFactor;
-        }
-
-        return cost;
-    }
-
-    public static int getRandomExam(Ant currentAnt) {
-
-        r = new Random();
-        int randomSeed = r.nextInt();
-        r.setSeed(randomSeed);
-
-        int randomExamIndex = r.nextInt(0, currentAnt.notVisited.size());
-        int chosenExamIndex = currentAnt.notVisited.get(randomExamIndex);
-        currentAnt.removeExam(randomExamIndex);
-        return chosenExamIndex;
-    }
-
-    public static int returnRandomExamIndex(Ant currentAnt) {
-        r = new Random();
-        r.setSeed(seed);
-
-        int randomExamIndex = r.nextInt(0, currentAnt.notVisited.size());
-        int chosenExamIndex = currentAnt.notVisited.get(randomExamIndex);
-        currentAnt.removeExam(randomExamIndex);
-        return chosenExamIndex;
-    }
-
-    public static int computeTransitionProbability(HashMap<String, String> partialSolution, Exam e) {
-
-        int timeslot = -1;
-        resetTimeslotTable(possibleTimeslotsTable);
-
-
-        while(violatesHardConstraint(possibleTimeslotsTable, partialSolution, e, timeslot) && possibleTimeslotsTable.size()>0) {
-            //System.out.println(">> violateshc loop");
-            double pheromoneImportance = 1;
-            double heuristicPenalty= 15;
-
-            double maxValue = -Double.MAX_VALUE;
-            double prob = 0;
-
-            for(int i=0;i<possibleTimeslotsTable.size();i++) {
-
-                int examTimeslot = possibleTimeslotsTable.get(i);
-                // corresponds to the inverse of the cost value at the end of the day
-                prob = e.getPheromones()[examTimeslot]*pheromoneImportance - e.getHeuristics()[examTimeslot]*heuristicPenalty;
-
-                if(prob>maxValue) {
-                    // with the max pheromone & least cost which is lowest heuristic
-                    maxValue = prob;
-                    timeslot = i;
-                    // goes to violateshc from here
-                }else {
-                }
-
-            }
-        }
-
-        return timeslot;
+        return softConstraintsViolations;
     }
 
     public static void readStudentsFile() {
@@ -929,9 +339,7 @@ public class Main {
                     }
                 }
                 counterrow++;
-
             }
-
 
         } catch (FileNotFoundException e) {
             // TODO Auto-generated catch block
@@ -1053,10 +461,6 @@ public class Main {
         }
     }
 
-    /*
-    Bu metod, bir sınavın kaç öğrencinin alacağını bulmak için kullanılır. Öğrencilerin listesi ve sınavların listesi kullanılarak, her bir sınav için kaç öğrencinin alacağı sayısı bulunur.
-    Öğrencilerin listesi ve sınavların listesi, önceden okunan "öğrenci" ve "sınav" dosyalarından elde edilir. Elde edilen sayı, bir "HashMap" nesnesine "sınav adı" ve "öğrenci sayısı" olarak eklenir.
-     */
     public static void findStudentSizeForExam() {
 
         // Öğrenci sayısını tutacak olan değişken
@@ -1083,37 +487,18 @@ public class Main {
         }
     }
 
-    /*
-    Bu metod, verilen sınav zamanlama çözümünün maliyetini hesaplamak için kullanılır.
-    Öncelikle, maliyet değişkeni sıfıra eşitlenir. Daha sonra, her bir sınav için aşağıdaki adımlar uygulanır:
-    Sınavın atandığı zaman aralığı (timeslot) belirlenir.
-    Bu sınavın atandığı zaman aralığındaki diğer sınavlarla çakışma sayısı bulunur.
-    Çakışma sayısı, sınavın maliyetini artırmak için kullanılır.
-    Bu işlem diğer sınavlar için de tekrarlanır ve sınavların toplam maliyeti hesaplanır.
-     */
-
-    //ALOOOOOOO
-    public static double computeSolutionCost(HashMap<String, String> solution) throws InterruptedException {
-        double cost = 0;
-
-        for(int i=0; i<exams.size(); i++) {
-            Exam e = exams.get(i);
-
-            String key = e.getExamName();
-            int timeslot = Integer.parseInt(solution.get(key));
-            //double examPheromone = e.getPheromones()[timeslot];
-            //cost += (1-examPheromone) + examHeuristic;
-        }
-        return cost;
-    }
-
-    /*Bu metod, mevcut odaların bir kopyasını oluşturur ve bu kopyalara "atananZamanlar" adında bir ek alan ekler. Bu alan, her bir oda için atanan zaman aralıklarını tutar. Örneğin, sınav 1'in sınav odasına atandığı zamanı bu alana kaydeder.
-    Bu sayede, bir sonraki sınavı atamak için kullanılabilir odaları belirleme işlemi yapılabilir. */
     public static void createAssignmentForRooms() {
         // copy rooms with extra field called assignedTimeslots for that room
 
         for (int i = 0; i < rooms.size(); i++) {
             assignedRooms.add(new AssignedRoom(String.valueOf(i)));
+        }
+    }
+
+    public static void createAssignmentForInstructors() {
+        // copy rooms with extra field called assignedTimeslots for that room
+        for (int i = 0; i < instructor.size(); i++) {
+            assignedInstructors.add(new AssignedInstructor(instructor.get(i).getInstructorId()));
         }
     }
 
@@ -1171,10 +556,6 @@ public class Main {
         return errorCode;
     }
 
-    /*
-    The purpose of the assignRoom function is to assign rooms to exams according to the given timeslots. It does this by iterating through the list of rooms and checking if the current room is available at the given timeslot. If a room is available, it is assigned to the exam and added to the list of assigned rooms. If no room is available at the given timeslot, the function returns an error code. This function also takes into account the required space for each exam, as specified in the requiredSpace variable.
-     */
-
     public static void assignRoom(HashMap<String, String> solution) throws InterruptedException {
         // runs after assigning timeslots
         // need a list of assigned rooms till now
@@ -1225,14 +606,6 @@ public class Main {
         }
     }
 
-
-    public static void createAssignmentForInstructors() {
-        // copy rooms with extra field called assignedTimeslots for that room
-        for (int i = 0; i < instructor.size(); i++) {
-            assignedInstructors.add(new AssignedInstructor(instructor.get(i).getInstructorId()));
-        }
-    }
-
     //ALOOOOOOOOO solution neymiş araştır
     public static void assignInstructor(HashMap<String, String> solution) throws InterruptedException {
         // same with room
@@ -1258,51 +631,29 @@ public class Main {
     }
 
     ArrayList<String> maxStudentExams = new ArrayList<String>();
-
     static int[] examStudentSize = new int[413];
 
-    public static void computeExamStudentSize() {
-        // finds total students thats taking the exam
-        for (Student s : students) {
-            Vector<String> currentStudentClasses = s.getExams();
-            for (int i = 0; i < currentStudentClasses.size(); i++) {
-                int idOfExam = findExamByName(currentStudentClasses.get(i));
-                examStudentSize[idOfExam] += 1;
-            }
-        }
-    }
-
-
-        // create initial population
-        Population population = new Population(GeneticAlgorithm.populationSize).initializePopulation();
-
-        public static void printPopulation (Population population) throws IOException {
+    public static void printPopulation (Population population) throws IOException {
             printGA(population.getChromosomes()[0]);
 
-            System.out.println("------------------------");
+            System.out.println("PRINT_POPULATION");
 
             for (int i = 0; i < population.getChromosomes().length; i++) {
-                System.out.println("Chromosome #" + i + ":" + Arrays.toString(population.getChromosomes()[i].getGenes()) +
-                        "| Fitness " + population.getChromosomes()[i].getFitness());
+                System.out.println("Chromosome #" + i + ":" + Arrays.toString(population.getChromosomes()[i].getGenes()) + "| Fitness " + population.getChromosomes()[i].getFitness());
             }
-        }
+    }
 
-        public static void printGA (Chromosome chromosome) throws IOException {
+    public static void printGA (Chromosome chromosome) throws IOException {
 
             int[] genes = chromosome.getGenes();
-
             for (int i = 0; i < chromosome.getGeneLength(); i++) {
                 if (genes[i] == 1) {
-                    System.out.println(students.get(i).getStudentId() + " , StudentID: " +
-                            exams.get(i).getExamCode() + ", examCode: " + rooms.get(i).getRoomId()
-                            + ",roomID):  . ");
+                    System.out.println(" StudentID : " + students.get(i).getStudentId() + ", examCode : " + exams.get(i).getExamCode() + ", roomID : " + rooms.get(i).getRoomId() + ".");
                 }
             }
+    }
 
-        }
-
-            static String[][] timeslots = {
-
+    static String[][] timeslots = {
                 // preference as cost 1 increases the cost, -1 decreases the cost morning exams not preferred
                 //timeslot id, week, timeslot, preference, ga
                 {"0", "MO", "1", "07:30-09:30", "1", "0"},
@@ -1366,91 +717,6 @@ public class Main {
                 {"47", "FR", "2", "12:30-14:30", "-1", "0"},
                 {"48", "FR", "2", "15:00-17:00", "-1", "0"},
                 {"49", "FR", "2", "17:30-19:30", "1", "0"},
-            };
+    };
 
-        public static void printPopulation (Population population, String heading) throws IOException {
-            System.out.println(heading);
-            System.out.println("------------------------");
-            for (int i = 0; i < population.getChromosomes().length; i++) {
-
-                System.out.println("Chromosome #" + i + ":" + Arrays.toString(population.getChromosomes()[i].getGenes()) +
-                        "| Fitness" + population.getChromosomes()[i].getFitness());
-            }
-        }
-
-        public static void removeFromTimeslotTable(ArrayList<Integer> timeslotTable, int toremove) {
-        boolean removed=false;
-        for(int i=0; i<timeslotTable.size(); i++) {
-
-            if(timeslotTable.get(i) == toremove) {
-
-                timeslotTable.remove(i);
-                removed = true;
-            }
-        }
-    }
-
-        public static void printConflictMatrix() {
-        System.out.println("Conflict Matrix: ");
-        for(int i=0; i<conflictMatrix.length/40; i++) {
-            for(int j=0; j<conflictMatrix.length; j++) {
-                System.out.println("the " + "["+i+"]" + "["+j+"] element: " + conflictMatrix[i][j]);
-            }
-        }
-    }
-
-        public static void printTheExamCalendar() { }
-
-    public static void main(String[] args) throws InterruptedException, IOException {
-
-        readStudentsFile();
-        readInstructorFile();
-        readRoomFile();
-        readExamsFile();
-
-        findStudentSizeForExam();
-        createAssignmentForRooms();
-        createConflictMatrix();
-
-        initializeExamTimeslotCounters(); // createAnts();
-
-        Population population = new Population(GeneticAlgorithm.populationSize).initializePopulation();
-
-        GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm();
-
-        System.out.println("------------------------");
-        System.out.println("Generation #0" + "| Fittest chromosome fitness:" + population.getChromosomes()[0].getFitness());
-        //System.out.println("Generation #" + generationNumber+" | Fittest chromosome fitness: "+ population.getChromosomes()[0].getFitness());
-        printPopulation(population);
-
-        int generationNumber = 0;
-        GeneticAlgorithm ga = new GeneticAlgorithm();
-
-        while (generationNumber < 50) {
-            generationNumber++;
-            System.out.println("\n ---------------------------");
-            population = geneticAlgorithm.evolve(population);
-            population.sortChromosomesByFitness();
-            System.out.println("Generation #" + generationNumber + " | Fittest chromosome fitness:" + population.getChromosomes()[0].getFitness());
-            printPopulation(population);
-        }
-
-        System.out.println("> Students: " + students.size());
-        System.out.println("> Exams: " + exams.size());
-        System.out.println("> Rooms: " + rooms.size());
-        System.out.println("> Instructors: " + instructor.size());
-        System.out.println("> Conflict Matrix: [" + conflictMatrix.length + "," + conflictMatrix[0].length + "]");
-        System.out.println("\n\n");
-
-
-        System.err.print(">> Genetic Algorithm running...");
-
-        System.out.println();
-
-        //runFirst();
-        // runAco();
-
-        System.err.print(">> End.");
-
-    }
 }

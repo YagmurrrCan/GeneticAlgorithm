@@ -1,12 +1,8 @@
-import model.Solution;
-
 import java.io.IOException;
 import java.util.*;
 
 //Individuals
 public class Chromosome {
-
-    Main main = new Main();
 
     private int[] genes;
     private double fitness = -1;  //0
@@ -15,9 +11,7 @@ public class Chromosome {
     private int numbOfConflicts = 0;
 
     public Chromosome() {
-
         //Initialization
-        // geneLength belirtmezsem => this.geneLength = geneLength;
         this.genes = new int[geneLength];
 
         Random rn = new Random();
@@ -26,7 +20,6 @@ public class Chromosome {
         for (int i = 0; i < genes.length; i++) {
             genes[i] = Math.abs(rn.nextInt() % 2);
         }
-
         fitness = 0;
     }
 
@@ -43,7 +36,6 @@ public class Chromosome {
         return fitness;
     }
 
-
     public int getNumbOfConflicts() {
         return numbOfConflicts;
     }
@@ -53,7 +45,6 @@ public class Chromosome {
     }
 
     public Chromosome initializeChromosome(){
-
         for(int i = 0; i < genes.length; i++) {
             if( Math.random() > 0.5 ) genes[i]=1;
             else genes[i]=0;
@@ -65,34 +56,14 @@ public class Chromosome {
         return Arrays.toString(this.genes);
     }
 
-    //Calculate fitness
     public double calculateFitness() throws IOException {
-        // Implement the logic to calculate the fitness value for this chromosome.
-        // The higher the fitness value, the more suitable the chromosome is for
-        // the problem at hand.
-        double totalFitness = 0;
 
-        for (int i = 0; i < genes.length; i++) {
-           label:
-            if(genes[i] == 1) {
-                if( totalFitness + Main.checkHardConstraints().get(i)){
-                Random rand = new Random();
+        int hardConstraints = Main.calculateHardConstraints();
+        int softConstraints = Main.calculateSoftConstraints();
 
-                // nextInt as provided by Random is exclusive of the top value so you need to add 1
-
-                int randomPosition = rand.nextInt(geneLength);
-                genes[randomPosition]=0;
-                totalFitness=0;
-                i=0;
-                break label;
-            }
-                double totalFitness = hardConstraintsFitness + softConstraintsFitness;
-            }
-        }
-        return totalFitness;
+        return (hardConstraints + softConstraints);
     }
-
-    /* Bu crossover metodu, rastgele bir kesişim (crossover) noktası seçer ve iki Chromosome nesnesinin genlerini bu noktada kesiştirir. */
+        /* Bu crossover metodu, rastgele bir kesişim (crossover) noktası seçer ve iki Chromosome nesnesinin genlerini bu noktada kesiştirir. */
     public Chromosome crossover(Chromosome other) {
         // Perform crossover with another chromosome to produce new offspring.
         // This might involve randomly selecting genes from each parent

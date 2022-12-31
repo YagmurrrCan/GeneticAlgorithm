@@ -7,13 +7,12 @@ public class Exam {
     double ga[] = new double[50];
     String examCode;
 
-
     public Exam(String examName) {
         super();
         this.examName = examName;
         this.examCode = examName.substring(studentCount, 2);
 
-        for(int i=0;i<50;i++) {
+        for(int i=0; i<50; i++) {
             this.ga[i] = 0;
         }
     }

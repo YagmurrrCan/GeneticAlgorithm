@@ -1,19 +1,9 @@
-import java.io.IOException;
-import java.util.Random;
-/*
-crossoverPopulation()" metodu, verilen Population nesnesinin ilk bireylerini elit bireyler olarak saklar ve diğer bireyler için "selectTournamentPopulation()" metodu ile turnuva seçimi yapar. Daha sonra bu turnuva seçiminden çıkan Chromosome örnekleri arasından rastgele iki tane seçilerek "crossoverChromosome()" metodu ile çaprazlama işlemi gerçekleştirilir.
-
-"mutatePopulation()" metodu ise, verilen Population nesnesinin ilk bireylerini elit bireyler olarak saklar ve diğer bireyler için "mutateChromosome()" metodu ile mutasyon işlemi gerçekleştirilir.
-
-Bu sınıfta ayrıca, turnuva seçimi için kullanılacak "selectTournamentPopulation()" metodu ve Chromosome örnekleri arasında çaprazlama işlemi gerçekleştirilen "crossoverChromosome()" metodu da bulunmaktadır.
- */
-
 public class GeneticAlgorithm {
 
-    public static final int populationSize = 30;
+    public static final int populationSize = 50;
     public static final int noOfEliteChromosomes = 1;
     public static final int tournamentSelectionSize = 24; //3
-    private static final double mutationRate = 0.5;
+    private static final double mutationRate = 50;
 
     public Population evolve(Population population) {
         return mutatePopulation(crossoverPopulation(population));
@@ -45,11 +35,8 @@ public class GeneticAlgorithm {
 
 
         }
-
-
         return mutatePopulation;
     }
-
 
     private Chromosome crossoverChromosome(Chromosome chromosome1, Chromosome chromosome2) {
         // random genes selection from parent chromosomes
@@ -87,77 +74,3 @@ public class GeneticAlgorithm {
 
     }
 }
-
-    /*
-
-    public static final double  crossoverRate = 0.9;
-
-    private int numGenerations;
-
-    public GeneticAlgorithm(int numGenerations) {
-        this.numGenerations = numGenerations;
-    }
-*/
-    /* Bu yöntem, mevcut popülasyonu girdi olarak alır ve onu çaprazlama ve mutasyon uygulayarak geliştirir. Önce mevcut popülasyondan seçkin çözümleri tutar, ardından yeni yavrular oluşturmak için popülasyondaki en uygun çözümlerle çaprazlama gerçekleştirir. Son olarak, yavruya belirli bir mutasyon oranı ile mutasyon uygular ve evrimleşmiş popülasyonu döndürür.
-
-     * // Keep the elite solutions from the current population.
-    for (int i = 0; i < noOfEliteChromosomes; i++) {
-        nextPopulation.getChromosomes()[i] = population.getFittestChromosomes(1).getChromosomes()[i];
-    }
-
-    // Perform crossover with the fittest solutions from the population.
-    for (int i = noOfEliteChromosomes; i < population.getPopulationSize(); i++) {
-        Solution offspring = population.selectFittestSolutions(tournamentSelectionSize).getFittestSolution().crossover(population.getFittestSolutions(tournamentSelectionSize).getFittestSolution());
-
-        // Apply mutation to the offspring.
-        if (Math.random() <= mutationRate) {
-            offspring.mutate();
-        }
-
-        nextPopulation.getSolutions()[i] = offspring;
-    }
-
-    return nextPopulation;
-
-     */
-   /*
-    public Population evolve(Population population) throws IOException {
-        // Evolve the population by applying crossover and mutation.
-        Population nextPopulation = new Population(population.getPopulationSize(), population.getChromosomes()[0].getGenesLength());
-
-        // Keep the elite solutions from the current population.
-        for (int i = 0; i < noOfEliteChromosomes; i++) {
-            nextPopulation.getChromosomes()[i] = population.getFittestChromosomes(1).getChromosomes()[i];
-        }
-
-        // Perform crossover with the fittest solutions from the population.
-        for (int i = noOfEliteChromosomes; i < population.getPopulationSize(); i++) {
-            Chromosome offspring = population.selectFittestChromosomes(tournamentSelectionSize).getFittestChromosome().crossover(population.getFittestChromosomes(tournamentSelectionSize).getFittestChromosome());
-
-            // Apply mutation to the offspring.
-            if (Math.random() <= mutationRate) {
-                offspring.mutate();
-            }
-
-            nextPopulation.getChromosomes()[i] = offspring;
-        }
-
-        return nextPopulation;
-    }
-
-    public Chromosome run() throws IOException {
-        // Run the genetic algorithm to solve the university timetabling problem.
-        Population population = new Population(populationSize, 75);
-        population.initializePopulation();
-
-        // Evolve the population over the specified number of generations.
-        for (int i = 0; i < numGenerations; i++) {
-            population = evolve(population);
-        }
-
-        // Return the fittest chromosome from the final evolved population.
-        return population.getFittestChromosomes(1).getFittestChromosome();
-    }
-}
-
-*/

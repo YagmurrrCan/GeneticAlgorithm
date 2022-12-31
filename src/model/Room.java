@@ -11,7 +11,7 @@ public class Room {
     String building;
     int number;
     String seatingCapacity;
-    boolean availability; /*isFull*/
+    boolean availability;
 
 
     Room(String roomId, String roomName, String building, int number, String seatingCapacity) {
@@ -52,17 +52,6 @@ public class Room {
     public void setAvailability(boolean availability) {
         this.availability = availability;
     }
-
-    /*
-    public boolean isFull() {
-
-        return isFull;
-    }
-
-    public void setFull(boolean full) {
-        isFull = full;
-    }
-    */
 
     public int getNumber() {
         return number;

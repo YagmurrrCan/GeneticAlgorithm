@@ -13,7 +13,6 @@ import java.util.Vector;
 public class Student {
     private String studentId;
    // private String studentName;
-   // private String studentSurname;
    // private String departmentId;
     private String course; //program
     private int maxExamCount;

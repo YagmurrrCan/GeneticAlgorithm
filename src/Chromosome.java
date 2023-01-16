@@ -59,9 +59,12 @@ public class Chromosome {
     public double calculateFitness() throws IOException {
 
         int hardConstraints = Main.calculateHardConstraints();
-        int softConstraints = Main.calculateSoftConstraints();
+        int hardConstraints2 = Main.calculateHardConstraints2();
+        int hardConstraints3 = Main.calculateHardConstraints3();
+        int hardConstraints4 = Main.calculateHardConstraints3();
+        int softConstraints1 = Main.calculateSoftConstraint1();
 
-        return (hardConstraints + softConstraints);
+        return ( hardConstraints +  hardConstraints2 + hardConstraints3 + hardConstraints4 + 0.5 * softConstraints1);
     }
         /* Bu crossover metodu, rastgele bir kesişim (crossover) noktası seçer ve iki Chromosome nesnesinin genlerini bu noktada kesiştirir. */
     public Chromosome crossover(Chromosome other) {

@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.time.LocalTime;
 import java.util.*;
 
 public class Main {
@@ -138,10 +139,9 @@ public class Main {
         return hardConstraintsViolations;
     }
 
-    public static int calculateSoftConstraints() throws IOException {
-        // Calculate soft constraints violations.
-        // These constraints are preferred to be satisfied, but a solution can still be valid if they are not.
-        int softConstraintsViolations = 0;
+    public static int calculateHardConstraints2() throws IOException {
+        // Calculate hard constraints violations.
+        int hardConstraintsViolations = 0;
         // Iterate through all instructors
         for (Instructor instructor : instructor) {
             // Count the number of exams that this instructor is scheduled to proctor in the same timeslot
@@ -153,8 +153,61 @@ public class Main {
             }
             // If the instructor is proctoring more than 1 exam in the same timeslot, increment the number of soft constraints violations
             if (examCount > 1) {
-                softConstraintsViolations += examCount - 1;
+                hardConstraintsViolations += examCount - 1;
             }
+        }
+        return hardConstraintsViolations;
+    }
+
+    public static int calculateHardConstraints3() throws IOException {
+        int hardConstraintsViolations = 0;
+
+        for (int i = 0; i < examTimeslotCounters.size(); i++) {
+            Student student1 = students.get(i);
+            if (student1.getMaxExamCount() <= 3) {
+                hardConstraintsViolations++;
+            }
+        }
+        return hardConstraintsViolations;
+    }
+
+    public static int calculateHardConstraints4() {
+        int hardConstraintsViolations = 0;
+
+        // Iterate through all rooms
+        for (Room room : rooms) {
+            int studentCount = 0;
+            // Count the number of students scheduled in this room
+            for (AssignedRoom assignedRoom : assignedRooms) {
+                if (assignedRoom.getRoomId().equals(room.getRoomId())) {
+                    studentCount += assignedRoom.getOccupiedTimeslots().size();
+                }
+            }
+            // If the number of students in the room exceeds the room's seating capacity, increment the number of soft constraints violations
+            if (studentCount > Integer.parseInt(room.getSeatingCapacity())) {
+                hardConstraintsViolations += studentCount - Integer.parseInt(room.getSeatingCapacity());
+            }
+        }
+        return hardConstraintsViolations;
+    }
+
+    public static int calculateSoftConstraint1() {
+        int softConstraintsViolations = 0;
+        // Iterate through all instructors
+        for (Instructor instructor : instructor) {
+            int instructorAvaibilityViolations = 0;
+            // Count the number of times the instructor is scheduled during their unavailable times
+            for (AssignedInstructor assignedInstructor : assignedInstructors) {
+                if (assignedInstructor.getInstructorId().equals(instructor.getInstructorId())) {
+                    for (String occupiedTimeslot : assignedInstructor.getOccupiedTimeslots()) {
+                        if (!instructor.getInstructorAvaibility().contains(occupiedTimeslot)) {
+                            instructorAvaibilityViolations++;
+                        }
+                    }
+                }
+            }
+            // Increment the number of soft constraints violations with the number of times the instructor is scheduled during their unavailable times
+            softConstraintsViolations += instructorAvaibilityViolations;
         }
         return softConstraintsViolations;
     }
@@ -606,7 +659,6 @@ public class Main {
         }
     }
 
-    //ALOOOOOOOOO solution neymiş araştır
     public static void assignInstructor(HashMap<String, String> solution) throws InterruptedException {
         // same with room
         // check timeslot
